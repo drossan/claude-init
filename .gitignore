@@ -57,3 +57,7 @@ wheels/
 .claude/sessions/active/*
 !.claude/sessions/active/sessions_template.md
 .claude/settings.local.json
+
+/claude_examples/
+/examples/
+/clade_skeleton/
