@@ -21,12 +21,12 @@ func TestGlobalConfig_SaveAndLoad(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
 
-	// Guardar el path original para restaurarlo después
-	originalGetConfigPath := GetConfigPath
-	GetConfigPath = func() (string, error) {
+	// Guardar la función original para restaurarla después
+	originalConfigPathFunc := configPathFunc
+	configPathFunc = func() (string, error) {
 		return configPath, nil
 	}
-	defer func() { GetConfigPath = originalGetConfigPath }()
+	defer func() { configPathFunc = originalConfigPathFunc }()
 
 	t.Run("save and load valid config", func(t *testing.T) {
 		config := &GlobalConfig{

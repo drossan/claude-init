@@ -3,6 +3,7 @@ package claude
 import (
 	"testing"
 
+	"github.com/drossan/claude-init/internal/ai"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -223,10 +224,34 @@ func TestAnalyzer_parseAnalysis_MalformedJSON(t *testing.T) {
 	assert.Contains(t, err.Error(), "failed to parse JSON")
 }
 
+// mockClient is a mock implementation of ai.Client for testing.
+type mockClient struct{}
+
+func (m *mockClient) SendMessage(systemPrompt, userMessage string) (string, error) {
+	return `{"name":"test","description":"test","language":"Go","architecture":"Clean","project_category":"API","business_context":"test"}`, nil
+}
+
+func (m *mockClient) SendSimpleMessage(message string) (string, error) {
+	return "", nil
+}
+
+func (m *mockClient) Provider() ai.Provider {
+	return "mock"
+}
+
+func (m *mockClient) IsAvailable() (bool, error) {
+	return true, nil
+}
+
+func (m *mockClient) Close() error {
+	return nil
+}
+
 // TestNewAnalyzer_CreatesAnalyzer tests NewAnalyzer creates a valid Analyzer.
 func TestNewAnalyzer_CreatesAnalyzer(t *testing.T) {
 	projectPath := "/path/to/project"
-	a := NewAnalyzer(projectPath)
+	client := &mockClient{}
+	a := NewAnalyzer(projectPath, client)
 
 	assert.NotNil(t, a)
 	assert.Equal(t, projectPath, a.projectPath)
@@ -234,7 +259,8 @@ func TestNewAnalyzer_CreatesAnalyzer(t *testing.T) {
 
 // TestAnalyzer_SetLogger tests SetLogger sets the logger.
 func TestAnalyzer_SetLogger(t *testing.T) {
-	a := NewAnalyzer("/test")
+	client := &mockClient{}
+	a := NewAnalyzer("/test", client)
 	mockLogger := &mockLogger{}
 
 	a.SetLogger(mockLogger)
@@ -244,11 +270,14 @@ func TestAnalyzer_SetLogger(t *testing.T) {
 
 // TestAnalyzer_buildAnalysisPrompt_ReturnsPrompt tests buildAnalysisPrompt returns valid prompt.
 func TestAnalyzer_buildAnalysisPrompt_ReturnsPrompt(t *testing.T) {
-	a := NewAnalyzer("/test/project")
+	client := &mockClient{}
+	a := NewAnalyzer("/test/project", client)
 
-	prompt := a.buildAnalysisPrompt()
+	projectInfo := "Project directory: test-project\n"
+	prompt := a.buildAnalysisPrompt(projectInfo)
 
-	assert.Contains(t, prompt, "/test/project")
+	// El prompt debe contener la información del proyecto
+	assert.Contains(t, prompt, "Project directory: test-project")
 	assert.Contains(t, prompt, "JSON")
 	assert.Contains(t, prompt, "name")
 	assert.Contains(t, prompt, "language")

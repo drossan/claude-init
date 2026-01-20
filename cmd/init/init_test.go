@@ -5,12 +5,36 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/drossan/claude-init/internal/ai"
 	"github.com/drossan/claude-init/internal/logger"
 	"github.com/drossan/claude-init/internal/survey"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// mockClient is a mock implementation of ai.Client for testing.
+type mockClient struct{}
+
+func (m *mockClient) SendMessage(systemPrompt, userMessage string) (string, error) {
+	return "", nil
+}
+
+func (m *mockClient) SendSimpleMessage(message string) (string, error) {
+	return "", nil
+}
+
+func (m *mockClient) Provider() ai.Provider {
+	return "mock"
+}
+
+func (m *mockClient) IsAvailable() (bool, error) {
+	return true, nil
+}
+
+func (m *mockClient) Close() error {
+	return nil
+}
 
 // TestNewInitCommand_CreatesCommand verifica que NewInitCommand crea un comando válido.
 func TestNewInitCommand_CreatesCommand(t *testing.T) {
@@ -241,7 +265,8 @@ func TestGenerateClaudeStructure_CreatesAllComponents(t *testing.T) {
 		DryRun:    false,
 	}
 
-	err := generateClaudeStructure(tempDir, opts, answers)
+	client := &mockClient{}
+	err := generateClaudeStructure(tempDir, opts, answers, client)
 	assert.NoError(t, err)
 
 	// Verificar que se creó la estructura

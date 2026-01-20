@@ -1546,8 +1546,6 @@ func (g *Generator) buildCommandTemplateWithContext(commandType, agentsContext, 
 
 %s
 
-%s
-
 ## AVAILABLE AGENTS AND SKILLS
 
 Below are the agents and skills that have been created for this project.
@@ -1588,7 +1586,7 @@ Look at each agent's DESCRIPTION and each skill's PURPOSE to determine which one
 
 ## CRITICAL REQUIREMENTS
 
-When creating the %s command:
+When creating this command:
 
 1. **ANALYZE THE AVAILABLE AGENTS**: Read each agent's description in the list above. Find the agent whose DESCRIPTION best matches this command's purpose.
 
@@ -1650,7 +1648,6 @@ Remember the core principles from the guide:
 			}
 			return ""
 		}(),
-		commandType,
 	)
 
 	// Agregar instrucciones específicas para OpenAI
@@ -2845,7 +2842,7 @@ La guía debe ser un documento markdown completo que incluya:
    - Comandos de build para producción
 
 9. **Uso de la Estructura .claude/**:
-   - Cómo usar los commands disponibles (%s)
+   - Cómo usar los commands disponibles
    - Cuándo invocar agentes específicos
    - Skills recomendadas para cada tarea
 

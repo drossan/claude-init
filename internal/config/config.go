@@ -10,6 +10,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// configPathFunc permite mockear GetConfigPath en tests.
+var configPathFunc = defaultGetConfigPath
+
 // GlobalConfig representa la configuración global del CLI.
 type GlobalConfig struct {
 	Provider  string                    `yaml:"provider"`
@@ -24,12 +27,8 @@ type ProviderConfig struct {
 	MaxTokens int    `yaml:"max_tokens,omitempty"`
 }
 
-// GetConfigPath retorna el path del archivo de configuración global.
-// Sigue el estándar XDG Base Directory Specification.
-// macOS: ~/.config/claude-init/config.yaml
-// Linux: ~/.config/claude-init/config.yaml
-// Windows: %APPDATA%\claude-init\config.yaml
-func GetConfigPath() (string, error) {
+// defaultGetConfigPath implementa la lógica por defecto para obtener el path de configuración.
+func defaultGetConfigPath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", fmt.Errorf("error getting current user: %w", err)
@@ -52,6 +51,15 @@ func GetConfigPath() (string, error) {
 	}
 
 	return filepath.Join(configDir, "config.yaml"), nil
+}
+
+// GetConfigPath retorna el path del archivo de configuración global.
+// Sigue el estándar XDG Base Directory Specification.
+// macOS: ~/.config/claude-init/config.yaml
+// Linux: ~/.config/claude-init/config.yaml
+// Windows: %APPDATA%\claude-init\config.yaml
+func GetConfigPath() (string, error) {
+	return configPathFunc()
 }
 
 // Load carga la configuración global desde disco.
