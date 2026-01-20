@@ -53,6 +53,23 @@ de [releases](https://github.com/drossan/claude-init/releases) para:
 - macOS (amd64, arm64)
 - Windows (amd64)
 
+### Homebrew (macOS/Linux)
+
+Puedes instalar claude-init usando [Homebrew](https://brew.sh/):
+
+```bash
+# Añadir el tap
+brew tap drossan/homebrew-tools
+
+# Instalar
+brew install claude-init
+
+# Actualizar
+brew upgrade claude-init
+```
+
+El Homebrew formula se actualiza automáticamente con cada release.
+
 ## Uso Rápido
 
 ```bash
