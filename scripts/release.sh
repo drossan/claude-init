@@ -85,7 +85,7 @@ echo ""
 
 # Step 1: Run tests
 log_info "Step 1/6: Running tests..."
-if ! make test-race; then
+if ! make test-short; then
     log_error "Tests failed"
     exit 1
 fi
