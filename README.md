@@ -13,16 +13,19 @@ opcionalmente valida con IA, y genera la estructura `.claude/` necesaria.
 
 ## Características
 
-- **Survey Interactivo**: 8 preguntas clave sobre tu proyecto
-    - Nombre, descripción, lenguaje principal
-    - Framework, arquitectura, base de datos
-    - Tipo de proyecto y contexto del negocio
-- **Validación con IA**: Detecta información faltante automáticamente
+- **Soporte para Proyectos Nuevos y Existentes**:
+  - Proyectos nuevos: Survey interactivo de 8 preguntas
+  - Proyectos existentes: Análisis automático de la estructura del proyecto
+- **Múltiples Proveedores de IA**:
+  - **Claude CLI**: Gratis con Claude Code PRO (opción por defecto)
+  - **Claude API**: Anthropic Claude API
+  - **OpenAI API**: GPT-4o y otros modelos
+  - **Z.AI API**: Models zai
+- **Análisis Automático**: Detecta lenguaje, framework, arquitectura y más
 - **Recomendaciones Inteligentes**: Sugiere agents, commands y skills basados en tu contexto
-- **Templates Basados en claude_examples**: Estructura probada en producción
-- **Integración con Múltiples Proveedores de IA**: Claude (Anthropic), OpenAI, z.ai
-- **Alta Cobertura de Tests**: Código de alta calidad con tests comprehensivos
-- **Personalizable**: Soporte para directorios de configuración custom y modo dry-run
+- **Modo Dry Run**: Previsualiza qué se generará antes de crear archivos
+- **Alta Cobertura de Tests**: Código de alta calidad con ~84% de coverage
+- **Configuración Flexible**: Soporte para directorios de configuración custom
 
 ## Instalación
 
@@ -60,10 +63,10 @@ claude-init init
 claude-init init /path/to/project
 
 # Configurar proveedor de IA
-claude-init config set --provider claude --api-key sk-ant-xxxxx
+claude-init config --provider claude-api
 
-# Ver configuración actual
-claude-init config show
+# Configurar proveedor CLI (gratis, requiere Claude Code PRO)
+claude-init config --provider cli
 
 # Mostrar versión
 claude-init version
@@ -76,12 +79,11 @@ claude-init completion bash > /etc/bash_completion.d/claude-init
 
 El comando `claude-init init` sigue este flujo:
 
-1. **Configuración de IA** (si es necesario): Si no hay credenciales configuradas, el wizard te guía para configurar tu
-   proveedor de IA
-2. **Survey Interactivo**: Responde 8 preguntas sobre tu proyecto
-3. **Validación con IA** (opcional): La IA detecta información faltante
-4. **Recomendaciones** (opcional): Sugiere estructura optimizada
-5. **Generación**: Crea la estructura `.claude/` desde `claude_examples/`
+1. **Selección de Proveedor de IA**: Elige entre Claude CLI (gratis con Claude Code PRO) o APIs de IA
+2. **Configuración** (si es necesario): Si eliges una API, el wizard te guía para ingresar tu API key
+3. **Origen del Proyecto**: Indica si es un proyecto nuevo o existente
+4. **Survey Interactivo**: Responde preguntas sobre tu proyecto (para proyectos nuevos) o confirma el análisis automático (para proyectos existentes)
+5. **Generación**: Crea la estructura `.claude/` con agents, skills y commands personalizados
 
 ### Preguntas del Survey
 
@@ -90,11 +92,16 @@ El CLI te hará las siguientes preguntas:
 1. **Nombre del proyecto**: Identificador único
 2. **Descripción breve**: Resumen del propósito
 3. **Lenguaje principal**: Go, Node.js, Python, Rust, etc.
-4. **Framework** (opcional): Express, NestJS, Django, etc.
-5. **Arquitectura deseada**: Monolito, Microservicios, Hexagonal, etc.
-6. **Base de datos** (opcional): PostgreSQL, MongoDB, etc.
-7. **Tipo de proyecto**: API REST, Web App, CLI, etc.
+4. **Framework** (opcional): Express, NestJS, Django, Gin, etc.
+5. **Arquitectura deseada**: Monolito, Microservicios, Hexagonal, Clean, DDD, etc.
+6. **Base de datos** (opcional): PostgreSQL, MongoDB, MySQL, etc.
+7. **Categoría del proyecto**: API REST, Web App, CLI, Library, etc.
 8. **Contexto del negocio**: Descripción detallada del dominio
+
+**Para proyectos existentes**, el CLI también puede:
+- Analizar automáticamente la estructura del proyecto
+- Detectar el lenguaje, framework y arquitectura
+- Preguntar por directorios de documentación adicionales
 
 ## Comandos
 
@@ -109,23 +116,17 @@ claude-init init [path] [flags]
 **Flags:**
 
 - `-f, --force`: Sobrescribe archivos existentes
-- `--ai-provider`: Proveedor de IA (claude, openai, zai)
-- `--api-key`: API key del proveedor de IA
-- `--no-ai`: No usar IA, usar valores por defecto
 - `--dry-run`: Muestra qué se generaría sin crear archivos
 - `--config-dir`: Directorio de configuración (default: `.claude`)
 
 **Ejemplos:**
 
 ```bash
-# Inicializar en el directorio actual
+# Inicializar en el directorio actual (wizard interactivo)
 claude-init init
 
 # Inicializar en un path específico
 claude-init init /path/to/project
-
-# Usar recomendaciones de IA
-claude-init init --ai-provider claude --api-key sk-ant-xxxxx
 
 # Dry run para ver qué se generaría
 claude-init init --dry-run
@@ -148,65 +149,51 @@ claude-init init --config-dir .ai-config
 
 ### config
 
-Gestiona la configuración de proveedores de IA.
+Configura los proveedores de IA (Claude CLI, Claude API, OpenAI, Z.AI).
 
 ```bash
-claude-init config [command]
+claude-init config [flags]
 ```
 
-**Subcomandos:**
+**Flags:**
 
-- `show`: Muestra la configuración actual de IA
-- `set`: Configura un proveedor de IA
-- `list`: Lista los proveedores disponibles
-- `unset`: Elimina la configuración de un proveedor
+- `-p, --provider`: Proveedor a configurar (cli, claude-api, openai, zai)
+
+**Proveedores Disponibles:**
+
+- `cli`: Claude CLI (gratis con Claude Code PRO) - **Opción por defecto**
+- `claude-api`: Anthropic Claude API (requiere API key)
+- `openai`: OpenAI API (requiere API key)
+- `zai`: Z.AI API (requiere API key)
 
 **Ejemplos:**
 
 ```bash
-# Mostrar configuración actual
-claude-init config show
+# Configurar usando wizard interactivo (recomendado)
+claude-init config
 
-# Configurar Anthropic Claude
-claude-init config set --provider claude --api-key sk-ant-xxxxx
+# Configurar Claude CLI directamente
+claude-init config --provider cli
+
+# Configurar Claude API
+claude-init config --provider claude-api
 
 # Configurar OpenAI
-claude-init config set --provider openai --api-key sk-xxxxx
+claude-init config --provider openai
 
-# Configurar z.ai
-claude-init config set --provider zai --api-key zai-xxxxx
-
-# Listar proveedores disponibles
-claude-init config list
-
-# Eliminar configuración de un proveedor
-claude-init config unset --provider claude
-
-# Usar un path de configuración custom
-claude-init config show --config-path /custom/path/config.yaml
+# Configurar Z.AI
+claude-init config --provider zai
 ```
 
 **Wizard de Configuración:**
 
-La primera vez que ejecutes `claude-init init` sin tener credenciales configuradas, el wizard te guiará para seleccionar
-un proveedor e ingresar tu API key de forma interactiva.
+El comando `config` iniciará un wizard interactivo que te guiará paso a paso:
 
-```
-============================================================
-AI Configuration Required
-============================================================
+1. **Selección de proveedor**: Elige entre Claude CLI, Claude API, OpenAI o Z.AI
+2. **API Key** (si aplica): Ingresa tu API key de forma segura
+3. **Configuración avanzada** (opcional): Base URL, modelo, max tokens
 
-No AI configuration found. Let's set up your AI provider.
-You can always change this later with: claude-init config set
-
-? Would you like to configure an AI provider now? Yes
-? Select an AI provider: Anthropic Claude (Recommended)
-? Enter your Anthropic Claude API key: sk-ant-xxxxx
-
-✓ AI configuration saved successfully!
-  Provider: Anthropic Claude
-  Config:   ~/.config/claude-init/config.yaml
-```
+La configuración se guarda en `~/.config/claude-init/config.yaml` (macOS/Linux) o `%APPDATA%\claude-init\config.yaml` (Windows).
 
 ### generate
 
@@ -305,14 +292,16 @@ La configuración de IA se almacena en `~/.config/claude-init/config.yaml`:
 
 ```yaml
 # Proveedor por defecto
-provider: claude
+provider: cli
 
 # Configuración de proveedores
 providers:
-  claude:
+  cli:
+    # Claude CLI no requiere API key, solo Claude Code PRO
+  claude-api:
     api_key: sk-ant-xxxxx
-    base_url: https://api.anthropic.com
-    model: claude-3-5-sonnet-20241022
+    base_url: https://api.anthropic.com/v1/messages
+    model: claude-sonnet-4-20250514
     max_tokens: 8192
   openai:
     api_key: sk-xxxxx
@@ -321,39 +310,16 @@ providers:
     max_tokens: 4096
   zai:
     api_key: zai-xxxxx
-    base_url: https://api.z.ai
-    model: zai-1-xxxxx
+    base_url: https://api.z.ai/v1
+    model: zai-large
     max_tokens: 4096
 ```
 
-### Gestión de Configuración
+### Notas Importantes
 
-Usa el comando `config` para gestionar tus credenciales:
-
-```bash
-# Ver configuración actual
-claude-init config show
-
-# Configurar un proveedor
-claude-init config set --provider claude --api-key sk-ant-xxxxx
-
-# Listar proveedores disponibles
-claude-init config list
-
-# Eliminar configuración
-claude-init config unset --provider claude
-```
-
-### Variables de Entorno (Alternativa)
-
-También puedes usar variables de entorno (tienen menor prioridad que los flags):
-
-```bash
-export CLAUDE_INIT_AI_PROVIDER=claude
-export CLAUDE_INIT_CLAUDE_API_KEY=sk-ant-xxxxx
-export CLAUDE_INIT_OPENAI_API_KEY=sk-xxxxx
-export CLAUDE_INIT_ZAI_API_KEY=zai-xxxxx
-```
+- **Claude CLI** (`cli`): Es la opción por defecto y gratuita si tienes Claude Code PRO. No requiere API key.
+- **APIs de IA**: Requieren una suscripción activa y API key válida.
+- **Configuración interactiva**: Usa `claude-init config` para configurar cualquier proveedor.
 
 ## Ejemplos
 
@@ -362,9 +328,6 @@ export CLAUDE_INIT_ZAI_API_KEY=zai-xxxxx
 ```bash
 cd /path/to/go-project
 claude-init init
-
-# Con recomendaciones de IA
-claude-init init --ai-provider claude --api-key sk-ant-xxxxx
 ```
 
 Estructura generada:
@@ -375,16 +338,16 @@ Estructura generada:
 │   ├── architect.md
 │   ├── developer.md
 │   ├── tester.md
-│   └── writer.md
+│   └── reviewer.md
 ├── skills/
-│   ├── language_go.md
-│   └── skill_testing.md
+│   ├── go.md
+│   └── testing.md
 ├── commands/
 │   ├── build.md
 │   ├── test.md
-│   └── run.md
-├── development_guide.md
-└── .gitignore
+│   └── lint.md
+├── project.yaml
+└── development_guide.md
 ```
 
 ### Proyecto Node.js/TypeScript
@@ -392,18 +355,12 @@ Estructura generada:
 ```bash
 cd /path/to/nodejs-project
 claude-init init
-
-# Con recomendaciones de IA
-claude-init init --ai-provider claude --api-key sk-ant-xxxxx
 ```
 
 ### Proyecto Python
 
 ```bash
 cd /path/to/python-project
-claude-init init
-
-# Con directorio de configuración custom
 claude-init init --config-dir .ai-config
 ```
 
@@ -413,6 +370,7 @@ claude-init init --config-dir .ai-config
 
 - Go 1.25 o superior
 - make (opcional, para usar el Makefile)
+- Claude Code PRO (si usas el proveedor `cli`) o suscripción a una API de IA (claude-api, openai, zai)
 
 ### Estructura del Proyecto
 
@@ -422,23 +380,18 @@ ia_start/
 │   ├── root/              # Comando raíz
 │   ├── init/              # Comando init
 │   ├── generate/          # Comando generate
+│   ├── config/            # Comando config
 │   ├── version/           # Comando version
 │   └── completion/        # Comando completion
 ├── internal/
-│   ├── ai/                # Clientes de IA (Claude, OpenAI, z.ai)
-│   ├── claudeexamples/    # Carga y generación desde claude_examples/
+│   ├── ai/                # Clientes de IA (Claude CLI, Claude API, OpenAI, Z.AI)
+│   ├── claude/            # Analizador de proyectos y generador de contenido
 │   ├── config/            # Gestión de configuración
 │   ├── logger/            # Utilidades de logging
-│   ├── survey/            # Sistema de preguntas interactivas
-│   └── templates/         # Generación de templates
-│       ├── embed/         # Templates embebidos
-│       ├── agents/        # Templates de agentes
-│       ├── skills/        # Templates de skills
-│       └── commands/      # Templates de comandos
-├── tests/                 # Tests de integración
+│   └── survey/            # Sistema de preguntas interactivas
 ├── main.go                # Punto de entrada
 ├── Makefile              # Automatización de build
-└── go.mod                # Módulos de Go
+└── go.mod                # Módulos de Go (Go 1.25)
 ```
 
 ### Comandos de Make
