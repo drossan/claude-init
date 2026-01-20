@@ -59,7 +59,6 @@ brews:
       name: homebrew-tools
       branch: main
     directory: Formula
-    download_strategy: GitHubReleaseDownloadStrategy
     skip_upload: auto
     test: |
       system "#{HOMEBREW_PREFIX}/bin/claude-init --version"
