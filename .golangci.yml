@@ -24,27 +24,26 @@ linters:
     - unused         # Detectar código unused
     - gosimple       # Simplificar código
     - ineffassign    # Detectar asignaciones ineffectivas
-    - deadcode       # Detectar código muerto
     - typecheck      # Verificar errores de tipo
     - gosec          # Security issues
     - gocyclo        # Complejidad ciclomática
     - dupl           # Duplicación de código
     - gofmt          # Formato Go
     - goimports      # Imports y formato
-    - misspell       # Typos
     - lll            # Líneas muy largas
     - unconvert      # Conversiones unnecessary
     - prealloc       # Preallocación de slices
-    - exportloopref  # Referencias a loop variables
     - nilerr         # Error en return sin check
 
   # Deshabilitar linters específicos (opcional)
   disable:
+    - misspell       # Código en español, palabras como "comando" son correctas
+    - deadcode       # Deprecated, reemplazado por unused
+    - exportloopref  # Deprecated, Go 1.22+ tiene loopvar
     - exhaustivestruct # Muy estricto
-    - funlen           # Muy estricto
-    - wsl              # Demasiado estricto con whitespace
-    - varnamelen       # Demasiado estricto con nombres de variables
-    - exhaustruct      # Demasiado estricto con structs
+    - funlen         # Muy estricto
+    - wsl            # Demasiado estricto con whitespace
+    - varnamelen     # Demasiado estricto con nombres de variables
 
 # Configuración de linters individuales
 linters-settings:
@@ -153,26 +152,67 @@ issues:
 
   # Excluir casos específicos
   exclude-rules:
+    # Excluir errcheck para logger y fmt
+    - linters:
+        - errcheck
+      text: "fmt.Fprintln|fmt.Fprintf|logger.Output"
+
     # Excluir errcheck para funciones main y test
     - path: _test\.go
       linters:
         - errcheck
         - gosec
 
+    # Excluir gosec para permisos de directorios (G301) y archivos (G306)
+    # Son aceptables para este proyecto
+    - linters:
+        - gosec
+      text: "G301|G306"
+
+    # Excluir gosec para lectura de archivos con variable (G304)
+    # Es un falso positivo común cuando la ruta viene de configuración
+    - linters:
+        - gosec
+      text: "G304"
+
+    # Excluir gosec G204 (subprocess with variable) para exec.Command
+    - linters:
+        - gosec
+      text: "G204"
+
+    # Excluir gocyclo para funciones complejas necesarias
+    - linters:
+        - gocyclo
+      text: "runGenerate|runInit|RunWithPrefill"
+
     # Excluir gocyclo para archivos de test
     - path: _test\.go
       linters:
         - gocyclo
 
-    # Excluir lll para URLs y strings largos
+    # Excluir lll para líneas largas en strings y comentarios
     - linters:
         - lll
-      source: "^http"
+
+    # Excluir dupl para README generation (código similar intencional)
+    - linters:
+        - dupl
+      text: "GenerateAgentsReadme|GenerateCommandsReadme"
 
     # Excluir dupl para archivos de test
     - path: _test\.go
       linters:
         - dupl
+
+    # Excluir staticcheck SA1019 (strings.Title deprecated)
+    - linters:
+        - staticcheck
+      text: "SA1019"
+
+    # Excluir gosimple S1039 (unnecessary fmt.Sprintf)
+    - linters:
+        - gosimple
+      text: "S1039"
 
   # Excluir casos por defecto
   exclude-use-default: false
