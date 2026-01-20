@@ -7,20 +7,6 @@ run:
   # Timeout para el análisis
   timeout: 5m
 
-  # Directorios a omitir
-  skip-dirs:
-    - vendor
-    - third_party
-    - testdata
-    - examples
-    - Godeps
-    - builtin
-
-  # Archivos a omitir
-  skip-files:
-    - ".*\\.pb\\.go$"
-    - ".*\\.gen\\.go$"
-
   # Build tags
   build-tags:
     - integration
@@ -77,11 +63,6 @@ linters-settings:
     check-type-assertions: true
     # Verificar asignaciones a blank identifier (_)
     check-blank: false
-    # Funciones a ignorar
-    ignore-functions:
-      - (io.Closer).Close
-      - (*database/sql.Rows).Close
-      - (*database/sql.DB).Close
 
   # staticcheck settings
   staticcheck:
@@ -156,6 +137,20 @@ issues:
   # Máximo número de issues por archivo
   max-issues-per-linter: 0
 
+  # Directorios a excluir
+  exclude-dirs:
+    - vendor
+    - third_party
+    - testdata
+    - examples
+    - Godeps
+    - builtin
+
+  # Archivos a excluir
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+
   # Excluir casos específicos
   exclude-rules:
     # Excluir errcheck para funciones main y test
@@ -184,17 +179,14 @@ issues:
 
 # Configuración de salida
 output:
-  # Formato de salida (colored-line-number, line-number, json, tab, checkstyle, etc.)
-  format: colored-line-number
-
+  # Formatos de salida
+  formats:
+    - format: colored-line-number
   # Imprimir linter name en el output
   print-linter-name: true
 
   # Imprimir información de las líneas
   print-issued-lines: true
-
-  # Imprimir código de las líneas
-  print-code: true
 
   # Ordenar resultados
   sort-results: true
