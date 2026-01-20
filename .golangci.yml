@@ -190,10 +190,6 @@ issues:
       linters:
         - gocyclo
 
-    # Excluir lll para líneas largas en strings y comentarios
-    - linters:
-        - lll
-
     # Excluir dupl para README generation (código similar intencional)
     - linters:
         - dupl
