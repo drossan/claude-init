@@ -36,16 +36,11 @@ release:
   mode: replace
 
 archives:
-  - id: tarball
-    format: tar.gz
+  - format: tar.gz
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     files:
       - LICENSE
       - README.md
-
-  - id: zip
-    format: zip
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
 
 checksum:
   name_template: 'checksums.txt'
@@ -65,8 +60,6 @@ brews:
     directory: Formula
     download_strategy: GitHubReleaseDownloadStrategy
     skip_upload: auto
-    ids:
-      - tarball
     test: |
       system "#{HOMEBREW_PREFIX}/bin/claude-init --version"
       stdout =~ /claude-init version/
