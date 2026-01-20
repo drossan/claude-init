@@ -127,15 +127,19 @@ func TestAnalyzer_parseAnalysis_ValidJSON_OptionalFields(t *testing.T) {
 	assert.Equal(t, "CLI", result.ProjectCategory)
 }
 
-// TestAnalyzer_parseAnalysis_MissingRequiredField tests error when required field is missing.
+// TestAnalyzer_parseAnalysis_MissingRequiredField tests that default values are used when required fields are missing.
 func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 	tests := []struct {
-		name      string
-		input     string
-		wantError string
+		name                string
+		input               string
+		wantName            string
+		wantLanguage        string
+		wantArchitecture    string
+		wantProjectCategory string
+		wantBusinessCtx     string
 	}{
 		{
-			name: "missing name",
+			name: "missing name uses default",
 			input: `{
 				"description": "Test",
 				"language": "Go",
@@ -143,10 +147,14 @@ func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 				"project_category": "API",
 				"business_context": "Test"
 			}`,
-			wantError: "missing required field: name",
+			wantName:            "Unknown Project",
+			wantLanguage:        "Go",
+			wantArchitecture:    "Clean",
+			wantProjectCategory: "API",
+			wantBusinessCtx:     "Test",
 		},
 		{
-			name: "missing language",
+			name: "missing language uses default",
 			input: `{
 				"name": "test",
 				"description": "Test",
@@ -154,10 +162,14 @@ func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 				"project_category": "API",
 				"business_context": "Test"
 			}`,
-			wantError: "missing required field: language",
+			wantName:            "test",
+			wantLanguage:        "Unknown",
+			wantArchitecture:    "Clean",
+			wantProjectCategory: "API",
+			wantBusinessCtx:     "Test",
 		},
 		{
-			name: "missing architecture",
+			name: "missing architecture uses default",
 			input: `{
 				"name": "test",
 				"description": "Test",
@@ -165,10 +177,14 @@ func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 				"project_category": "API",
 				"business_context": "Test"
 			}`,
-			wantError: "missing required field: architecture",
+			wantName:            "test",
+			wantLanguage:        "Go",
+			wantArchitecture:    "Monolith",
+			wantProjectCategory: "API",
+			wantBusinessCtx:     "Test",
 		},
 		{
-			name: "missing project_category",
+			name: "missing project_category uses default",
 			input: `{
 				"name": "test",
 				"description": "Test",
@@ -176,10 +192,14 @@ func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 				"architecture": "Clean",
 				"business_context": "Test"
 			}`,
-			wantError: "missing required field: project_category",
+			wantName:            "test",
+			wantLanguage:        "Go",
+			wantArchitecture:    "Clean",
+			wantProjectCategory: "General",
+			wantBusinessCtx:     "Test",
 		},
 		{
-			name: "missing business_context",
+			name: "missing business_context uses default",
 			input: `{
 				"name": "test",
 				"description": "Test",
@@ -187,17 +207,25 @@ func TestAnalyzer_parseAnalysis_MissingRequiredField(t *testing.T) {
 				"architecture": "Clean",
 				"project_category": "API"
 			}`,
-			wantError: "missing required field: business_context",
+			wantName:            "test",
+			wantLanguage:        "Go",
+			wantArchitecture:    "Clean",
+			wantProjectCategory: "API",
+			wantBusinessCtx:     "General purpose software project",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := &Analyzer{}
-			_, err := a.parseAnalysis(tt.input)
+			result, err := a.parseAnalysis(tt.input)
 
-			require.Error(t, err)
-			assert.Contains(t, err.Error(), tt.wantError)
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantName, result.Name)
+			assert.Equal(t, tt.wantLanguage, result.Language)
+			assert.Equal(t, tt.wantArchitecture, result.Architecture)
+			assert.Equal(t, tt.wantProjectCategory, result.ProjectCategory)
+			assert.Equal(t, tt.wantBusinessCtx, result.BusinessContext)
 		})
 	}
 }
@@ -221,7 +249,7 @@ func TestAnalyzer_parseAnalysis_MalformedJSON(t *testing.T) {
 	_, err := a.parseAnalysis(input)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse JSON")
+	assert.Contains(t, err.Error(), "no JSON found in response")
 }
 
 // mockClient is a mock implementation of ai.Client for testing.

@@ -34,7 +34,7 @@ func TestSanitizeFilename(t *testing.T) {
 		{
 			name:     "mixed case and spaces",
 			input:    "MyCode Reviewer",
-			expected: "mycode-reviewer",
+			expected: "my-code-reviewer",
 		},
 		{
 			name:     "with underscores",
