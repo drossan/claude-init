@@ -1,0 +1,74 @@
+# GoReleaser configuration for claude-init
+# See https://goreleaser.com/docs/introduction/ for more details
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod verify
+
+builds:
+  - binary: claude-init
+    main: ./main.go
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=vendor
+    ldflags:
+      - -s -w -extldflags '-static' -X 'main.version={{.Version}}' -X 'main.commit={{.ShortCommit}}' -X 'main.buildDate={{.Date}}'
+    ignore:
+      # Windows no soporta arm64
+      - goos: windows
+        goarch: arm64
+
+universal_binaries:
+  - name_template: 'claude-init'
+    replace: true
+
+release:
+  prerelease: auto
+  mode: replace
+
+archives:
+  - id: tarball
+    format: tar.gz
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+  - id: zip
+    format: zip
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  disable: false
+
+brews:
+  - name: claude-init
+    homepage: https://github.com/drossan/claude-init
+    description: "CLI tool to initialize projects with AI-assisted development configuration"
+    license: MIT
+    repository:
+      owner: drossan
+      name: homebrew-tools
+      branch: main
+    directory: Formula
+    download_strategy: GitHubReleaseDownloadStrategy
+    skip_upload: auto
+    ids:
+      - tarball
+    test: |
+      system "#{HOMEBREW_PREFIX}/bin/claude-init --version"
+      stdout =~ /claude-init version/
