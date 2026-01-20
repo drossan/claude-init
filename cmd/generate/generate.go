@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	aifactory "github.com/danielrossellosanchez/claude-init/internal/ai"
-	"github.com/danielrossellosanchez/claude-init/internal/claude"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
-	"github.com/danielrossellosanchez/claude-init/internal/survey"
+	aifactory "github.com/drossan/claude-init/internal/ai"
+	"github.com/drossan/claude-init/internal/claude"
+	"github.com/drossan/claude-init/internal/logger"
+	"github.com/drossan/claude-init/internal/survey"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/danielrossellosanchez/claude-init/internal/claude"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
-	"github.com/danielrossellosanchez/claude-init/internal/survey"
+	"github.com/drossan/claude-init/internal/claude"
+	"github.com/drossan/claude-init/internal/logger"
+	"github.com/drossan/claude-init/internal/survey"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"

@@ -2,8 +2,8 @@
 
 > CLI para inicializar proyectos con configuración guiada por IA
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/danielrossellosanchez/claude-init)](https://goreportcard.com/report/github.com/danielrossellosanchez/claude-init)
-[![Coverage](https://img.shields.io/badge/coverage-83.6%25-brightgreen)](https://github.com/danielrossellosanchez/claude-init)
+[![Go Report Card](https://goreportcard.com/badge/github.com/drossan/claude-init)](https://goreportcard.com/report/github.com/drossan/claude-init)
+[![Coverage](https://img.shields.io/badge/coverage-83.6%25-brightgreen)](https://github.com/drossan/claude-init)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go)](https://go.dev/)
 
@@ -29,7 +29,7 @@ opcionalmente valida con IA, y genera la estructura `.claude/` necesaria.
 ### Desde código fuente
 
 ```bash
-git clone https://github.com/danielrossellosanchez/claude-init.git
+git clone https://github.com/drossan/claude-init.git
 cd claude-init
 make build
 sudo mv bin/claude-init /usr/local/bin/
@@ -38,13 +38,13 @@ sudo mv bin/claude-init /usr/local/bin/
 ### Usando go install
 
 ```bash
-go install github.com/danielrossellosanchez/claude-init@latest
+go install github.com/drossan/claude-init@latest
 ```
 
 ### Desde binarios precompilados
 
 Los binarios precompilados están disponibles en la página
-de [releases](https://github.com/danielrossellosanchez/claude-init/releases) para:
+de [releases](https://github.com/drossan/claude-init/releases) para:
 
 - Linux (amd64)
 - macOS (amd64, arm64)

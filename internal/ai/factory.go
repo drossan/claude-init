@@ -3,11 +3,11 @@ package ai
 import (
 	"fmt"
 
-	"github.com/danielrossellosanchez/claude-init/internal/ai/claudeapi"
-	"github.com/danielrossellosanchez/claude-init/internal/ai/cli"
-	"github.com/danielrossellosanchez/claude-init/internal/ai/openai"
-	"github.com/danielrossellosanchez/claude-init/internal/ai/zai"
-	"github.com/danielrossellosanchez/claude-init/internal/config"
+	"github.com/drossan/claude-init/internal/ai/claudeapi"
+	"github.com/drossan/claude-init/internal/ai/cli"
+	"github.com/drossan/claude-init/internal/ai/openai"
+	"github.com/drossan/claude-init/internal/ai/zai"
+	"github.com/drossan/claude-init/internal/config"
 )
 
 // ClientFactory crea clientes de IA según el provider.

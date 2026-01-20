@@ -18,7 +18,7 @@ BUILD_DATE?=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "unknown")
 # Variables de Go
 GO=go
 GOFLAGS=-v
-LDFLAGS=-s -w -X "github.com/danielrossellosanchez/claude-init/cmd/version.Version=$(VERSION)" -X "github.com/danielrossellosanchez/claude-init/cmd/version.Commit=$(COMMIT)" -X "github.com/danielrossellosanchez/claude-init/cmd/version.BuildDate=$(BUILD_DATE)"
+LDFLAGS=-s -w -X "github.com/drossan/claude-init/cmd/version.Version=$(VERSION)" -X "github.com/drossan/claude-init/cmd/version.Commit=$(COMMIT)" -X "github.com/drossan/claude-init/cmd/version.BuildDate=$(BUILD_DATE)"
 
 # Plataformas para build multi-plataforma
 PLATFORMS=linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64

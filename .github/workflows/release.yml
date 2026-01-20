@@ -87,7 +87,7 @@ jobs:
           BINARY_NAME=${BINARY_NAME}.exe
         fi
 
-        go build -v -ldflags "-s -w -X github.com/danielrossellosanchez/claude-init/cmd/version.Version=$VERSION -X github.com/danielrossellosanchez/claude-init/cmd/version.Commit=$COMMIT -X github.com/danielrossellosanchez/claude-init/cmd/version.BuildDate=$BUILD_DATE" -o $BINARY_NAME ./main.go
+        go build -v -ldflags "-s -w -X github.com/drossan/claude-init/cmd/version.Version=$VERSION -X github.com/drossan/claude-init/cmd/version.Commit=$COMMIT -X github.com/drossan/claude-init/cmd/version.BuildDate=$BUILD_DATE" -o $BINARY_NAME ./main.go
 
     - name: Create archive
       env:

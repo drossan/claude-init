@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/danielrossellosanchez/claude-init/internal/config"
+	"github.com/drossan/claude-init/internal/config"
 	"github.com/spf13/cobra"
 )
 

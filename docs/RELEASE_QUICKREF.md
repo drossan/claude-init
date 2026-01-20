@@ -51,8 +51,8 @@ git push origin v0.1.0
 gh release view v0.1.0
 
 # Download and test a binary
-curl -LO https://github.com/danielrossellosanchez/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz
-curl -LO https://github.com/danielrossellosanchez/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz.sha256
+curl -LO https://github.com/drossan/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz
+curl -LO https://github.com/drossan/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz.sha256
 
 # Verify checksum
 sha256sum -c claude-init-v0.1.0-linux-amd64.tar.gz.sha256
@@ -128,7 +128,7 @@ When you push a tag:
 3. Release creates GitHub Release
 4. Artifacts are uploaded
 
-Monitor at: https://github.com/danielrossellosanchez/claude-init/actions
+Monitor at: https://github.com/drossan/claude-init/actions
 
 ## Documentation
 

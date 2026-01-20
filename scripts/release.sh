@@ -146,7 +146,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "  4. Upload release artifacts"
     echo ""
     log_info "Watch the release at:"
-    log_info "  https://github.com/danielrossellosanchez/claude-init/actions"
+    log_info "  https://github.com/drossan/claude-init/actions"
 else
     log_warning "Tag not pushed. To push manually:"
     log_warning "  git push $REMOTE $VERSION"

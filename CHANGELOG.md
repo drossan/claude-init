@@ -205,7 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING CHANGE**: Project renamed from `ia-start` to `claude-init`
-  - Module path changed from `github.com/danielrossellosanchez/ia-start` to `github.com/danielrossellosanchez/claude-init`
+  - Module path changed from `github.com/danielrossellosanchez/ia-start` to `github.com/drossan/claude-init`
   - Binary renamed from `ia-start` to `claude-init`
   - All CLI commands now use `claude-init` prefix
   - Environment variables renamed: `IA_START_*` → `CLAUDE_INIT_*`
@@ -266,6 +266,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `init` and `detect` commands
 - Configuration file support
 
-[Unreleased]: https://github.com/danielrossellosanchez/claude-init/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/danielrossellosanchez/claude-init/releases/tag/v0.2.0
-[0.1.0]: https://github.com/danielrossellosanchez/claude-init/releases/tag/v0.1.0
+[Unreleased]: https://github.com/drossan/claude-init/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/drossan/claude-init/releases/tag/v0.2.0
+[0.1.0]: https://github.com/drossan/claude-init/releases/tag/v0.1.0

@@ -169,8 +169,8 @@ gh release view v0.1.0
 gh release view v0.1.0 --json assets -q '.assets[].name'
 
 # 3. Descargar y verificar un binario
-curl -LO https://github.com/danielrossellosanchez/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz
-curl -LO https://github.com/danielrossellosanchez/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz.sha256
+curl -LO https://github.com/drossan/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz
+curl -LO https://github.com/drossan/claude-init/releases/download/v0.1.0/claude-init-v0.1.0-linux-amd64.tar.gz.sha256
 
 # Verificar checksum
 sha256sum -c claude-init-v0.1.0-linux-amd64.tar.gz.sha256

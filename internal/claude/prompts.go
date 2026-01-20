@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/danielrossellosanchez/claude-init/internal/survey"
+	"github.com/drossan/claude-init/internal/survey"
 )
 
 // PromptBuilder construye prompts para Claude CLI basados en el contexto del proyecto.

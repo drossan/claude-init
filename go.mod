@@ -1,4 +1,4 @@
-module github.com/danielrossellosanchez/claude-init
+module github.com/drossan/claude-init
 
 go 1.25
 

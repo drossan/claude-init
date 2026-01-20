@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/danielrossellosanchez/claude-init/cmd/root"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
+	"github.com/drossan/claude-init/cmd/root"
+	"github.com/drossan/claude-init/internal/logger"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/danielrossellosanchez/claude-init/internal/ai"
+	"github.com/drossan/claude-init/internal/ai"
 )
 
 // ProjectAnalysis contiene el análisis del proyecto extraído por Claude.

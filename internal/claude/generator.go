@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/danielrossellosanchez/claude-init/internal/ai"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
-	"github.com/danielrossellosanchez/claude-init/internal/survey"
+	"github.com/drossan/claude-init/internal/ai"
+	"github.com/drossan/claude-init/internal/logger"
+	"github.com/drossan/claude-init/internal/survey"
 )
 
 //go:embed embeds/agent_guide.md

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/danielrossellosanchez/claude-init/internal/survey"
+	"github.com/drossan/claude-init/internal/survey"
 )
 
 // TemplateLoader maneja la carga de templates base desde claude_examples/.

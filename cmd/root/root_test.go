@@ -5,8 +5,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/danielrossellosanchez/claude-init/cmd/root"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
+	"github.com/drossan/claude-init/cmd/root"
+	"github.com/drossan/claude-init/internal/logger"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

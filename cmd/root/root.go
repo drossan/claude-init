@@ -1,12 +1,12 @@
 package root
 
 import (
-	"github.com/danielrossellosanchez/claude-init/cmd/completion"
-	configcmd "github.com/danielrossellosanchez/claude-init/cmd/config"
-	"github.com/danielrossellosanchez/claude-init/cmd/generate"
-	initcmd "github.com/danielrossellosanchez/claude-init/cmd/init"
-	"github.com/danielrossellosanchez/claude-init/cmd/version"
-	"github.com/danielrossellosanchez/claude-init/internal/logger"
+	"github.com/drossan/claude-init/cmd/completion"
+	configcmd "github.com/drossan/claude-init/cmd/config"
+	"github.com/drossan/claude-init/cmd/generate"
+	initcmd "github.com/drossan/claude-init/cmd/init"
+	"github.com/drossan/claude-init/cmd/version"
+	"github.com/drossan/claude-init/internal/logger"
 	"github.com/spf13/cobra"
 )
 
