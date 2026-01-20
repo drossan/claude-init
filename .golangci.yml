@@ -1,0 +1,200 @@
+# Configuración de golangci-lint para ia-start
+#
+# Este archivo configura los linters a utilizar y sus opciones.
+# Para ejecutar: golangci-lint run ./...
+
+run:
+  # Timeout para el análisis
+  timeout: 5m
+
+  # Directorios a omitir
+  skip-dirs:
+    - vendor
+    - third_party
+    - testdata
+    - examples
+    - Godeps
+    - builtin
+
+  # Archivos a omitir
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+
+  # Build tags
+  build-tags:
+    - integration
+
+  #Número de goroutines
+  concurrency: 4
+
+# Linters a utilizar
+linters:
+  # Habilitar linters específicos
+  enable:
+    - govet          # Detector de bugs del compilador Go
+    - errcheck       # Verificar que los errores no sean ignorados
+    - staticcheck    # Verificar bugs, performance y style
+    - unused         # Detectar código unused
+    - gosimple       # Simplificar código
+    - ineffassign    # Detectar asignaciones ineffectivas
+    - deadcode       # Detectar código muerto
+    - typecheck      # Verificar errores de tipo
+    - gosec          # Security issues
+    - gocyclo        # Complejidad ciclomática
+    - dupl           # Duplicación de código
+    - gofmt          # Formato Go
+    - goimports      # Imports y formato
+    - misspell       # Typos
+    - lll            # Líneas muy largas
+    - unconvert      # Conversiones unnecessary
+    - prealloc       # Preallocación de slices
+    - exportloopref  # Referencias a loop variables
+    - nilerr         # Error en return sin check
+
+  # Deshabilitar linters específicos (opcional)
+  disable:
+    - exhaustivestruct # Muy estricto
+    - funlen           # Muy estricto
+    - wsl              # Demasiado estricto con whitespace
+    - varnamelen       # Demasiado estricto con nombres de variables
+    - exhaustruct      # Demasiado estricto con structs
+
+# Configuración de linters individuales
+linters-settings:
+  # govet settings
+  govet:
+    # Habilitar todos los analizadores
+    enable-all: true
+    # Deshabilitar analizadores específicos
+    disable:
+      - shadow
+      - fieldalignment
+
+  # errcheck settings
+  errcheck:
+    # Verificar funciones con type assertions
+    check-type-assertions: true
+    # Verificar asignaciones a blank identifier (_)
+    check-blank: false
+    # Funciones a ignorar
+    ignore-functions:
+      - (io.Closer).Close
+      - (*database/sql.Rows).Close
+      - (*database/sql.DB).Close
+
+  # staticcheck settings
+  staticcheck:
+    # Checks adicionales
+    checks: ["all"]
+
+  # gosimple settings
+  gosimple:
+    # Checks adicionales
+    checks: ["all"]
+
+  # gocyclo settings
+  gocyclo:
+    # Complejidad ciclomática mínima para reportar
+    min-complexity: 15
+
+  # dupl settings
+  dupl:
+    # Tokens mínimos para considerar duplicación
+    threshold: 100
+
+  # gofmt settings
+  gofmt:
+    # Usar gofmt con -s
+    simplify: true
+
+  # goimports settings
+  goimports:
+    # Local prefix para imports
+    local-prefixes: github.com/danielrossellosanchez/ia-start
+
+  # misspell settings
+  misspell:
+    # Locale a usar
+    locale: US
+    # Palabras ignoradas
+    ignore-words:
+      - someword
+
+  # lll settings (líneas largas)
+  lll:
+    # Longitud de línea máxima
+    line-length: 140
+    # Especificar tab width
+    tab-width: 4
+
+  # prealloc settings
+  prealloc:
+    # Reportar preallocations
+    simple: true
+    range-loops: true
+    for-loops: false
+
+  # gosec settings
+  gosec:
+    # Excluir reglas específicas
+    excludes:
+      - G104  # Errores no verificados (ya cubierto por errcheck)
+      - G307  # Deferr en Close() (ya cubierto por errcheck)
+
+    # Configurar reglas específicas
+    config:
+      G306: # WriteFile con permisos
+        # Permisos permitidos
+        WriteFilePermissions: "0644"
+
+# Configuración de issues
+issues:
+  # Máximo número de issues del mismo linter
+  max-same-issues: 0
+
+  # Máximo número de issues por archivo
+  max-issues-per-linter: 0
+
+  # Excluir casos específicos
+  exclude-rules:
+    # Excluir errcheck para funciones main y test
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+
+    # Excluir gocyclo para archivos de test
+    - path: _test\.go
+      linters:
+        - gocyclo
+
+    # Excluir lll para URLs y strings largos
+    - linters:
+        - lll
+      source: "^http"
+
+    # Excluir dupl para archivos de test
+    - path: _test\.go
+      linters:
+        - dupl
+
+  # Excluir casos por defecto
+  exclude-use-default: false
+
+# Configuración de salida
+output:
+  # Formato de salida (colored-line-number, line-number, json, tab, checkstyle, etc.)
+  format: colored-line-number
+
+  # Imprimir linter name en el output
+  print-linter-name: true
+
+  # Imprimir información de las líneas
+  print-issued-lines: true
+
+  # Imprimir código de las líneas
+  print-code: true
+
+  # Ordenar resultados
+  sort-results: true
