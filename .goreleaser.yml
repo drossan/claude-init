@@ -31,10 +31,11 @@ universal_binaries:
   - name_template: 'claude-init'
     replace: true
 
-release:
-  prerelease: auto
-  mode: replace
-  overwrite: true
+publishers:
+  - name: github
+    prerelease: auto
+    mode: replace
+    overwrite: true
 
 archives:
   - format: tar.gz
