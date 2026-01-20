@@ -34,6 +34,7 @@ universal_binaries:
 release:
   prerelease: auto
   mode: replace
+  overwrite: true
 
 archives:
   - format: tar.gz
