@@ -24,17 +24,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
 
-    - name: Run tests
-      run: go test ./... -v -race -timeout=15m
+      - name: Run tests
+        run: go test ./... -v -race -timeout=15m
 
   # Job de build multi-plataforma
   build:
@@ -44,77 +44,77 @@ jobs:
 
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
+        goos: [ linux, darwin, windows ]
+        goarch: [ amd64, arm64 ]
         exclude:
           - goos: windows
             goarch: arm64
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-        cache: true
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
 
-    - name: Get version
-      id: version
-      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
-    - name: Get commit
-      id: commit
-      run: echo "COMMIT=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+      - name: Get commit
+        id: commit
+        run: echo "COMMIT=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-    - name: Get build date
-      id: date
-      run: echo "BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+      - name: Get build date
+        id: date
+        run: echo "BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
 
-    - name: Build binary
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-        CGO_ENABLED: 0
-      run: |
-        VERSION=${{ steps.version.outputs.VERSION }}
-        COMMIT=${{ steps.commit.outputs.COMMIT }}
-        BUILD_DATE=${{ steps.date.outputs.BUILD_DATE }}
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          COMMIT=${{ steps.commit.outputs.COMMIT }}
+          BUILD_DATE=${{ steps.date.outputs.BUILD_DATE }}
+          
+          BINARY_NAME=claude-init-${{ matrix.goos }}-${{ matrix.goarch }}
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY_NAME=${BINARY_NAME}.exe
+          fi
+          
+          go build -v -ldflags "-s -w -X github.com/drossan/claude-init/cmd/version.Version=$VERSION -X github.com/drossan/claude-init/cmd/version.Commit=$COMMIT -X github.com/drossan/claude-init/cmd/version.BuildDate=$BUILD_DATE" -o $BINARY_NAME ./main.go
 
-        BINARY_NAME=claude-init-${{ matrix.goos }}-${{ matrix.goarch }}
-        if [ "${{ matrix.goos }}" = "windows" ]; then
-          BINARY_NAME=${BINARY_NAME}.exe
-        fi
+      - name: Create archive
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          BINARY_NAME=claude-init-${{ matrix.goos }}-${{ matrix.goarch }}
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            BINARY_NAME=${BINARY_NAME}.exe
+          fi
+          
+          ARCHIVE_NAME=claude-init-$VERSION-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          tar -czf $ARCHIVE_NAME $BINARY_NAME
+          
+          # Generar checksum
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            sha256sum $ARCHIVE_NAME > $ARCHIVE_NAME.sha256
+          else
+            shasum -a 256 $ARCHIVE_NAME > $ARCHIVE_NAME.sha256
+          fi
 
-        go build -v -ldflags "-s -w -X github.com/drossan/claude-init/cmd/version.Version=$VERSION -X github.com/drossan/claude-init/cmd/version.Commit=$COMMIT -X github.com/drossan/claude-init/cmd/version.BuildDate=$BUILD_DATE" -o $BINARY_NAME ./main.go
-
-    - name: Create archive
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-      run: |
-        VERSION=${{ steps.version.outputs.VERSION }}
-        BINARY_NAME=claude-init-${{ matrix.goos }}-${{ matrix.goarch }}
-        if [ "${{ matrix.goos }}" = "windows" ]; then
-          BINARY_NAME=${BINARY_NAME}.exe
-        fi
-
-        ARCHIVE_NAME=claude-init-$VERSION-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-        tar -czf $ARCHIVE_NAME $BINARY_NAME
-
-        # Generar checksum
-        if [ "${{ runner.os }}" = "Linux" ]; then
-          sha256sum $ARCHIVE_NAME > $ARCHIVE_NAME.sha256
-        else
-          shasum -a 256 $ARCHIVE_NAME > $ARCHIVE_NAME.sha256
-        fi
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-${{ matrix.goos }}-${{ matrix.goarch }}
-        path: claude-init-*.tar.gz*
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: claude-init-*.tar.gz*
 
   # Job de creacion de release
   release:
@@ -123,82 +123,82 @@ jobs:
     needs: build
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
-    - name: Prepare release assets
-      run: |
-        mkdir -p release
-        find artifacts -name "*.tar.gz" -exec cp {} release/ \;
-        find artifacts -name "*.sha256" -exec cp {} release/ \;
-        ls -lh release/
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+          find artifacts -name "*.tar.gz" -exec cp {} release/ \;
+          find artifacts -name "*.sha256" -exec cp {} release/ \;
+          ls -lh release/
 
-    - name: Generate release notes
-      id: release_notes
-      run: |
-        VERSION=${GITHUB_REF_NAME#v}
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          
+          cat > release_notes.md << EOF
+          ## claude-init $VERSION
+          
+          ### Installation
+          
+          #### Linux/macOS
+          \`\`\`bash
+          # Download and extract
+          curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-linux-amd64.tar.gz
+          tar -xzf claude-init-$VERSION-linux-amd64.tar.gz
+          
+          # Install
+          sudo mv claude-init-linux-amd64 /usr/local/bin/claude-init
+          claude-init version
+          \`\`\`
+          
+          #### macOS (Apple Silicon)
+          \`\`\`bash
+          # Download and extract
+          curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-darwin-arm64.tar.gz
+          tar -xzf claude-init-$VERSION-darwin-arm64.tar.gz
+          
+          # Install
+          sudo mv claude-init-darwin-arm64 /usr/local/bin/claude-init
+          claude-init version
+          \`\`\`
+          
+          #### Windows
+          \`\`\`powershell
+          # Download
+          curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-windows-amd64.tar.gz
+          
+          # Extract with tar or 7-Zip
+          tar -xzf claude-init-$VERSION-windows-amd64.tar.gz
+          
+          # Add to PATH
+          # Move claude-init-windows-amd64.exe to a directory in your PATH
+          claude-init-windows-amd64.exe version
+          \`\`\`
+          
+          ### Verify Checksum
+          
+          \`\`\`bash
+          # After downloading, verify the checksum
+          sha256sum -c claude-init-$VERSION-*.tar.gz.sha256
+          \`\`\`
+          
+          ### What's Changed
+          
+          Full Changelog: https://github.com/${{ github.repository }}/commits/${GITHUB_REF_NAME}
+          EOF
+          
+          cat release_notes.md
 
-        cat > release_notes.md << EOF
-        ## claude-init $VERSION
-
-        ### Installation
-
-        #### Linux/macOS
-        \`\`\`bash
-        # Download and extract
-        curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-linux-amd64.tar.gz
-        tar -xzf claude-init-$VERSION-linux-amd64.tar.gz
-
-        # Install
-        sudo mv claude-init-linux-amd64 /usr/local/bin/claude-init
-        claude-init version
-        \`\`\`
-
-        #### macOS (Apple Silicon)
-        \`\`\`bash
-        # Download and extract
-        curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-darwin-arm64.tar.gz
-        tar -xzf claude-init-$VERSION-darwin-arm64.tar.gz
-
-        # Install
-        sudo mv claude-init-darwin-arm64 /usr/local/bin/claude-init
-        claude-init version
-        \`\`\`
-
-        #### Windows
-        \`\`\`powershell
-        # Download
-        curl -LO https://github.com/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}/claude-init-$VERSION-windows-amd64.tar.gz
-
-        # Extract with tar or 7-Zip
-        tar -xzf claude-init-$VERSION-windows-amd64.tar.gz
-
-        # Add to PATH
-        # Move claude-init-windows-amd64.exe to a directory in your PATH
-        claude-init-windows-amd64.exe version
-        \`\`\`
-
-        ### Verify Checksum
-
-        \`\`\`bash
-        # After downloading, verify the checksum
-        sha256sum -c claude-init-$VERSION-*.tar.gz.sha256
-        \`\`\`
-
-        ### What's Changed
-
-        Full Changelog: https://github.com/${{ github.repository }}/commits/${GITHUB_REF_NAME}
-        EOF
-
-        cat release_notes.md
-
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release_notes.md
           draft: false
@@ -210,7 +210,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Release created
-      run: |
-        echo "Release ${{ github.ref_name }} created successfully!"
-        echo "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+      - name: Release created
+        run: |
+          echo "Release ${{ github.ref_name }} created successfully!"
+          echo "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
