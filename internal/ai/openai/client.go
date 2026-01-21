@@ -39,7 +39,7 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 		maxTokens:   maxTokens,
 		temperature: temperature,
 		client: &http.Client{
-			Timeout: 120 * time.Second,
+			Timeout: 300 * time.Second, // 5 minutos para modelos GPT-5
 		},
 	}
 }
