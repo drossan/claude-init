@@ -81,7 +81,7 @@ brew tap drossan/homebrew-tools
 brew install claude-init
 
 # Actualizar
-brew upgrade claude-init
+brew update --auto-update && brew upgrade claude-init
 ```
 
 El Homebrew formula se actualiza automáticamente con cada release.
