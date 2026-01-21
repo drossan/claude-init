@@ -721,6 +721,10 @@ func getAPIKeyURL(provider string) string {
 		return "https://platform.openai.com/account/api-keys"
 	case "zai":
 		return "https://z.ai"
+	case "gemini":
+		return "https://aistudio.google.com/apikey"
+	case "groq":
+		return "https://console.groq.com/keys"
 	default:
 		return ""
 	}
@@ -735,6 +739,10 @@ func getDefaultBaseURL(provider string) string {
 		return "https://api.openai.com/v1"
 	case "zai":
 		return "https://api.z.ai/v1"
+	case "gemini":
+		return "https://generativelanguage.googleapis.com/v1beta/models"
+	case "groq":
+		return "https://api.groq.com/openai/v1"
 	default:
 		return ""
 	}
@@ -746,9 +754,13 @@ func getDefaultModel(provider string) string {
 	case "claude-api":
 		return "claude-opus-4"
 	case "openai":
-		return "gpt-5.1"
+		return "gpt-4o-mini"
 	case "zai":
 		return "glm-4.7"
+	case "gemini":
+		return "gemini-2.5-flash"
+	case "groq":
+		return "llama-3.3-70b-versatile"
 	default:
 		return ""
 	}
@@ -762,11 +774,13 @@ func askAIProvider() (string, error) {
 		Options: []string{
 			"Claude CLI (Gratis, más lento)",
 			"OpenAI API (Requiere API key, más rápido)",
+			"Google Gemini API (Free tier disponible)",
+			"Groq API (Free tier disponible)",
 			// "Claude API (Requiere API key, más rápido)",
 			// "Z.AI API (Requiere API key, más rápido)",
 		},
 		Default: "Claude CLI (Gratis, más lento)",
-		Help:    "Claude CLI usa tu suscripción PRO existente. Las APIs requieren configuración previa y pago.",
+		Help:    "Claude CLI usa tu suscripción PRO existente. Gemini y Groq tienen capas gratuitas generosas.",
 	}
 
 	if err := gSurvey.AskOne(prompt, &provider); err != nil {
@@ -779,6 +793,10 @@ func askAIProvider() (string, error) {
 		return "cli", nil
 	case "OpenAI API (Requiere API key, más rápido)":
 		return "openai", nil
+	case "Google Gemini API (Free tier disponible)":
+		return "gemini", nil
+	case "Groq API (Free tier disponible)":
+		return "groq", nil
 	// Comentado temporalmente - se usará más adelante
 	// case "Claude API (Requiere API key, más rápido)":
 	// 	return "claude-api", nil

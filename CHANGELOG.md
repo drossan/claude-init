@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Google Gemini API support**: New AI provider option
+  - Client implementation with full Gemini API integration
+  - Supports `gemini-2.5-flash` model with 1M token context
+  - Free tier available (15 req/min, 250K tokens/min, 1000 req/day)
+  - API key: https://aistudio.google.com/apikey
+- **Groq API support**: New AI provider option
+  - OpenAI-compatible client implementation
+  - Supports `llama-3.3-70b-versatile` model with 32K context
+  - Extremely fast inference with LPU architecture
+  - Free tier available with generous limits
+  - API key: https://console.groq.com/keys
+- **Updated provider selectors**: Both `config` and `init` commands now include Gemini and Groq options
+
+### Changed
+- **OpenAI default model**: Changed from `gpt-5.1` to `gpt-4o-mini`
+  - ~100x more cost-effective for generation tasks
+  - Faster response times
+  - 16K completion tokens (sufficient for template generation)
+
 ### Fixed
+- **Skills README generation bug**: Fixed empty skills README and reorganized directory structure
+  - Skills are now generated directly in `skills/` root instead of subdirectories (`base/`, `language/`, `framework/`)
+  - `GenerateSkillsReadme()` now scans actual `.md` files instead of relying on conceptual skill names
+  - `ensureSkillCategory()` function injects `category` field in frontmatter if missing
+  - README now correctly lists all generated skills with their categories, descriptions, and purposes
+  - This fixes the issue where the skills README showed empty sections despite files being created
 - **AI template loading bug**: Removed dependency on `clade_skeleton/` filesystem files
   - `LoadTemplate()` functions in prompts packages attempted to read non-embedded files
   - Eliminated `LoadTemplate()` methods from AgentPromptGenerator, SkillPromptGenerator, and CommandPromptGenerator

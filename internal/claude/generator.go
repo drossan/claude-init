@@ -151,10 +151,10 @@ func (g *Generator) GenerateAgent(agentType string) error {
 func (g *Generator) GenerateSkill(skillType, skillName string) error {
 	g.logger.Debug("Generando skill %s:%s", skillType, skillName)
 
-	// Crear directorio de skills
-	skillsDir := filepath.Join(g.projectPath, ".claude", "skills", skillType)
+	// Crear directorio de skills (raíz, sin subdirectorios)
+	skillsDir := filepath.Join(g.projectPath, ".claude", "skills")
 	if err := os.MkdirAll(skillsDir, 0755); err != nil {
-		return fmt.Errorf("error creando directorio skills/%s: %w", skillType, err)
+		return fmt.Errorf("error creando directorio skills: %w", err)
 	}
 
 	// Sanitizar el nombre del archivo para que sea válido
@@ -193,8 +193,11 @@ func (g *Generator) GenerateSkill(skillType, skillName string) error {
 		}
 	}
 
-	// Escribir archivo
+	// Limpiar y asegurar que el frontmatter tenga la categoría correcta
 	content = g.cleanMarkdownOutput(content)
+	content = g.ensureSkillCategory(content, skillType, safeFileName)
+
+	// Escribir archivo
 	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("error escribiendo archivo skill %s: %w", skillName, err)
 	}
@@ -224,6 +227,72 @@ func (g *Generator) cleanMarkdownOutput(content string) string {
 	}
 
 	return content
+}
+
+// ensureSkillCategory asegura que el frontmatter tenga el campo category correcto.
+// SOBRESCRIBE cualquier category existente con el skillType correcto.
+func (g *Generator) ensureSkillCategory(content, skillType, skillName string) string {
+	// Buscar el inicio del frontmatter
+	startIdx := strings.Index(content, "---")
+	if startIdx == -1 {
+		// No hay frontmatter, crear uno básico con categoría
+		return fmt.Sprintf("---\nname: %s\ncategory: %s\ndescription: Skill for %s\n---\n\n%s",
+			skillName, skillType, skillName, content)
+	}
+
+	// Buscar el fin del frontmatter
+	endIdx := strings.Index(content[startIdx+3:], "---")
+	if endIdx == -1 {
+		// Frontmatter mal formado, retornar tal cual
+		return content
+	}
+
+	frontmatterStart := startIdx + 3
+	frontmatterEnd := startIdx + 3 + endIdx
+	frontmatter := content[frontmatterStart:frontmatterEnd]
+
+	// Reconstruir frontmatter SOBREESCRIBIENDO category
+	lines := strings.Split(frontmatter, "\n")
+	var newLines []string
+	categoryFound := false
+
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmedLine, "category:") {
+			// Sobrescribir category con el valor correcto
+			newLines = append(newLines, fmt.Sprintf("category: %s", skillType))
+			categoryFound = true
+		} else if trimmedLine != "" {
+			newLines = append(newLines, line)
+		}
+	}
+
+	// Si no se encontró category, añadirlo
+	if !categoryFound {
+		// Buscar dónde insertar (después de name o al principio)
+		insertPos := 0
+		for i, line := range newLines {
+			if strings.HasPrefix(strings.TrimSpace(line), "name:") {
+				insertPos = i + 1
+				break
+			}
+		}
+
+		categoryLine := fmt.Sprintf("category: %s", skillType)
+		var temp []string
+		temp = append(temp, newLines[:insertPos]...)
+		temp = append(temp, categoryLine)
+		temp = append(temp, newLines[insertPos:]...)
+		newLines = temp
+	}
+
+	newFrontmatter := strings.Join(newLines, "\n")
+
+	// Reconstruir el contenido completo
+	beforeFrontmatter := content[:startIdx]
+	afterFrontmatter := content[frontmatterEnd:]
+
+	return beforeFrontmatter + "---\n" + newFrontmatter + afterFrontmatter
 }
 
 // GenerateCommand genera un archivo de comando usando templates base o Claude CLI.
@@ -1146,7 +1215,45 @@ func (g *Generator) parseSkillFrontmatter(filePath string) (*SkillInfo, error) {
 		info.Purpose = fmt.Sprintf("Provides %s-related expertise and capabilities", name)
 	}
 
+	// Si la categoría sigue siendo "unknown", inferirla del nombre del archivo
+	if info.Category == "unknown" || info.Category == "" {
+		info.Category = g.inferCategoryFromName(name)
+	}
+
 	return info, nil
+}
+
+// inferCategoryFromName infiere una categoría basándose en el nombre del archivo.
+func (g *Generator) inferCategoryFromName(name string) string {
+	nameLower := strings.ToLower(name)
+
+	// Palabras clave para cada categoría
+	languageKeywords := []string{
+		"api", "data", "documentation", "error", "testing", "debug",
+		"http", "json", "sql", "graphql", "rest", "grpc",
+		"integration", "structur", "creation", "handling",
+	}
+	baseKeywords := []string{
+		"code-review", "review", "technical-writer", "writer",
+		"refactor", "lint", "format", "master",
+	}
+
+	// Verificar base keywords primero (más específicas)
+	for _, kw := range baseKeywords {
+		if strings.Contains(nameLower, kw) {
+			return "base"
+		}
+	}
+
+	// Verificar language keywords
+	for _, kw := range languageKeywords {
+		if strings.Contains(nameLower, kw) {
+			return "language"
+		}
+	}
+
+	// Por defecto, language (la mayoría de skills son de lenguaje)
+	return "language"
 }
 
 // parseListValue parsea un valor que puede ser una lista YAML o string simple.
@@ -1261,47 +1368,36 @@ func (g *Generator) buildAgentsReadmeContent(agents []*AgentInfo) string {
 }
 
 // GenerateSkillsReadme genera un README.md en el directorio skills/ que lista todas las skills.
-// El README agrupa skills por categoría (language, framework, base) con descripción y propósito.
-func (g *Generator) GenerateSkillsReadme(skillNames []string) error {
+// Escanea todos los archivos .md en skills/ (excepto README.md) y los agrupa por categoría.
+func (g *Generator) GenerateSkillsReadme(_ []string) error {
 	g.logger.Debug("Generando skills/README.md")
 
-	// Primero necesitamos determinar la categoría de cada skill
-	// Para esto, necesitamos recorrer los subdirectorios
 	skillsDir := filepath.Join(g.projectPath, ".claude", "skills")
 	outputPath := filepath.Join(skillsDir, "README.md")
 
+	// Escanear todos los archivos .md en el directorio skills/
+	entries, err := os.ReadDir(skillsDir)
+	if err != nil {
+		return fmt.Errorf("error leyendo directorio skills: %w", err)
+	}
+
 	// Parsear todas las skills para obtener su metadata
 	var skills []*SkillInfo
-	for _, skillName := range skillNames {
-		// Buscar en diferentes subdirectorios
-		categories := []string{"base", "language", "framework"}
-		var foundPath string
-
-		for _, cat := range categories {
-			catDir := filepath.Join(skillsDir, cat)
-			testPath := filepath.Join(catDir, sanitizeFilename(skillName)+".md")
-			if _, err := os.Stat(testPath); err == nil {
-				foundPath = testPath
-				break
-			}
-		}
-
-		// Si no se encontró en subdirectorios, buscar directamente en skills/
-		if foundPath == "" {
-			testPath := filepath.Join(skillsDir, sanitizeFilename(skillName)+".md")
-			if _, err := os.Stat(testPath); err == nil {
-				foundPath = testPath
-			}
-		}
-
-		if foundPath == "" {
-			g.logger.Warn("No se encontró archivo para skill %s", skillName)
+	for _, entry := range entries {
+		// Ignorar README.md y directorios
+		if entry.IsDir() || entry.Name() == "README.md" {
 			continue
 		}
 
-		info, err := g.parseSkillFrontmatter(foundPath)
+		// Solo procesar archivos .md
+		if !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+
+		skillPath := filepath.Join(skillsDir, entry.Name())
+		info, err := g.parseSkillFrontmatter(skillPath)
 		if err != nil {
-			g.logger.Warn("Error parsing skill %s: %v", skillName, err)
+			g.logger.Warn("Error parsing skill %s: %v", entry.Name(), err)
 			continue
 		}
 		skills = append(skills, info)

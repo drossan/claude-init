@@ -1,4 +1,4 @@
-package openai
+package groq
 
 import (
 	"bytes"
@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-// Client es un cliente para la API de OpenAI.
+// Client es un cliente para la API de Groq.
+// Groq es compatible con OpenAI API, por lo que reutilizamos su estructura.
 type Client struct {
 	apiKey      string
 	baseURL     string
@@ -19,18 +20,18 @@ type Client struct {
 	client      *http.Client
 }
 
-// NewClient crea un nuevo cliente de OpenAI.
+// NewClient crea un nuevo cliente de Groq.
 func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 	if baseURL == "" {
-		baseURL = "https://api.openai.com/v1"
+		baseURL = "https://api.groq.com/openai/v1"
 	}
 	if model == "" {
-		model = "gpt-4o-mini"
+		model = "llama-3.3-70b-versatile"
 	}
 	if maxTokens == 0 {
-		maxTokens = 16384 // GPT-4o-mini soporta 16K completion tokens
+		maxTokens = 32768 // Groq soporta hasta 32K tokens
 	}
-	temperature := float32(0.7) // Balance entre creatividad y coherencia
+	temperature := float32(0.7)
 
 	return &Client{
 		apiKey:      apiKey,
@@ -39,18 +40,17 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 		maxTokens:   maxTokens,
 		temperature: temperature,
 		client: &http.Client{
-			Timeout: 300 * time.Second, // 5 minutos para modelos GPT-5
+			Timeout: 60 * time.Second, // Groq es muy rápido, menor timeout
 		},
 	}
 }
 
-// chatRequest representa una solicitud a la API de chat de OpenAI.
+// chatRequest representa una solicitud a la API de chat de Groq (compatible con OpenAI).
 type chatRequest struct {
-	Model               string        `json:"model"`
-	Messages            []chatMessage `json:"messages"`
-	Temperature         float32       `json:"temperature,omitempty"`
-	MaxTokens           int           `json:"max_tokens,omitempty"`
-	MaxCompletionTokens int           `json:"max_completion_tokens,omitempty"`
+	Model       string        `json:"model"`
+	Messages    []chatMessage `json:"messages"`
+	Temperature float32       `json:"temperature,omitempty"`
+	MaxTokens   int           `json:"max_tokens,omitempty"`
 }
 
 // chatMessage representa un mensaje en la conversación.
@@ -84,7 +84,7 @@ type chatResponse struct {
 	} `json:"error,omitempty"`
 }
 
-// SendMessage envía un mensaje a OpenAI y retorna la respuesta.
+// SendMessage envía un mensaje a Groq y retorna la respuesta.
 func (c *Client) SendMessage(systemPrompt, userMessage string) (string, error) {
 	messages := []chatMessage{}
 
@@ -100,18 +100,11 @@ func (c *Client) SendMessage(systemPrompt, userMessage string) (string, error) {
 		Content: userMessage,
 	})
 
-	// GPT-5 models require max_completion_tokens instead of max_tokens
 	reqBody := chatRequest{
 		Model:       c.model,
 		Messages:    messages,
 		Temperature: c.temperature,
-	}
-
-	// Usar max_completion_tokens para modelos GPT-5, max_tokens para otros
-	if isGPT5Model(c.model) {
-		reqBody.MaxCompletionTokens = c.maxTokens
-	} else {
-		reqBody.MaxTokens = c.maxTokens
+		MaxTokens:   c.maxTokens,
 	}
 
 	jsonData, err := json.Marshal(reqBody)
@@ -165,30 +158,5 @@ func (c *Client) SendSimpleMessage(message string) (string, error) {
 
 // Close cierra el cliente y libera recursos.
 func (c *Client) Close() error {
-	// Nada que cerrar para el cliente HTTP básico
 	return nil
-}
-
-// isGPT5Model detecta si el modelo es un modelo GPT-5 que requiere max_completion_tokens.
-func isGPT5Model(model string) bool {
-	// Los modelos GPT-5 requieren max_completion_tokens en lugar de max_tokens
-	return contains(model, "gpt-5") && !contains(model, "gpt-4") && !contains(model, "gpt-3")
-}
-
-// contains verifica si una cadena contiene un substring (case-insensitive).
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr ||
-		len(s) > len(substr) && (s[:len(substr)] == substr ||
-			s[len(s)-len(substr):] == substr ||
-			findSubstring(s, substr)))
-}
-
-// findSubstring busca un substring en una cadena de forma case-insensitive.
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

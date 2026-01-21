@@ -5,6 +5,8 @@ import (
 
 	"github.com/drossan/claude-init/internal/ai/claudeapi"
 	"github.com/drossan/claude-init/internal/ai/cli"
+	"github.com/drossan/claude-init/internal/ai/gemini"
+	"github.com/drossan/claude-init/internal/ai/groq"
 	"github.com/drossan/claude-init/internal/ai/openai"
 	"github.com/drossan/claude-init/internal/ai/zai"
 	"github.com/drossan/claude-init/internal/config"
@@ -58,6 +60,22 @@ func (f *ClientFactory) CreateClient(provider Provider) (Client, error) {
 		}
 		client := zai.NewClient(cfg.APIKey, cfg.BaseURL, cfg.Model, cfg.MaxTokens)
 		return &ZAIClient{client: client}, nil
+
+	case ProviderGemini:
+		cfg, ok := f.config.GetProviderConfig("gemini")
+		if !ok || cfg.APIKey == "" {
+			return nil, fmt.Errorf("gemini provider not configured. Please run: claude-init config --provider gemini")
+		}
+		client := gemini.NewClient(cfg.APIKey, cfg.BaseURL, cfg.Model, cfg.MaxTokens)
+		return &GeminiClient{client: client}, nil
+
+	case ProviderGroq:
+		cfg, ok := f.config.GetProviderConfig("groq")
+		if !ok || cfg.APIKey == "" {
+			return nil, fmt.Errorf("groq provider not configured. Please run: claude-init config --provider groq")
+		}
+		client := groq.NewClient(cfg.APIKey, cfg.BaseURL, cfg.Model, cfg.MaxTokens)
+		return &GroqClient{client: client}, nil
 
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", provider)
@@ -198,5 +216,65 @@ func (c *ZAIClient) IsAvailable() (bool, error) {
 
 // Close cierra el cliente.
 func (c *ZAIClient) Close() error {
+	return c.client.Close()
+}
+
+// GeminiClient es un wrapper para el cliente de Gemini.
+type GeminiClient struct {
+	client *gemini.Client
+}
+
+// SendMessage envía un mensaje usando Gemini API.
+func (c *GeminiClient) SendMessage(systemPrompt, userMessage string) (string, error) {
+	return c.client.SendMessage(systemPrompt, userMessage)
+}
+
+// SendSimpleMessage envía un mensaje sin system prompt.
+func (c *GeminiClient) SendSimpleMessage(message string) (string, error) {
+	return c.client.SendSimpleMessage(message)
+}
+
+// Provider retorna el tipo de provider.
+func (c *GeminiClient) Provider() Provider {
+	return ProviderGemini
+}
+
+// IsAvailable siempre retorna true (si hay API key configurada).
+func (c *GeminiClient) IsAvailable() (bool, error) {
+	return true, nil
+}
+
+// Close cierra el cliente.
+func (c *GeminiClient) Close() error {
+	return c.client.Close()
+}
+
+// GroqClient es un wrapper para el cliente de Groq.
+type GroqClient struct {
+	client *groq.Client
+}
+
+// SendMessage envía un mensaje usando Groq API.
+func (c *GroqClient) SendMessage(systemPrompt, userMessage string) (string, error) {
+	return c.client.SendMessage(systemPrompt, userMessage)
+}
+
+// SendSimpleMessage envía un mensaje sin system prompt.
+func (c *GroqClient) SendSimpleMessage(message string) (string, error) {
+	return c.client.SendSimpleMessage(message)
+}
+
+// Provider retorna el tipo de provider.
+func (c *GroqClient) Provider() Provider {
+	return ProviderGroq
+}
+
+// IsAvailable siempre retorna true (si hay API key configurada).
+func (c *GroqClient) IsAvailable() (bool, error) {
+	return true, nil
+}
+
+// Close cierra el cliente.
+func (c *GroqClient) Close() error {
 	return c.client.Close()
 }

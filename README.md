@@ -18,8 +18,10 @@ opcionalmente valida con IA, y genera la estructura `.claude/` necesaria.
   - Proyectos existentes: Análisis automático de la estructura del proyecto
 - **Múltiples Proveedores de IA**:
   - **Claude CLI**: Gratis con Claude Code PRO (opción por defecto)
+  - **Google Gemini**: Free tier disponible (15 req/min, 250K tokens/min)
+  - **Groq**: Free tier disponible (extremadamente rápido)
+  - **OpenAI API**: Modelos GPT-4o-mini (coste-eficiente)
   - **Claude API**: Anthropic Claude API
-  - **OpenAI API**: GPT-4o y otros modelos
   - **Z.AI API**: Models zai
 - **Análisis Automático**: Detecta lenguaje, framework, arquitectura y más
 - **Recomendaciones Inteligentes**: Sugiere agents, commands y skills basados en tu contexto
@@ -166,7 +168,7 @@ claude-init init --config-dir .ai-config
 
 ### config
 
-Configura los proveedores de IA (Claude CLI, Claude API, OpenAI, Z.AI).
+Configura los proveedores de IA (Claude CLI, Gemini, Groq, OpenAI, Claude API, Z.AI).
 
 ```bash
 claude-init config [flags]
@@ -174,13 +176,15 @@ claude-init config [flags]
 
 **Flags:**
 
-- `-p, --provider`: Proveedor a configurar (cli, claude-api, openai, zai)
+- `-p, --provider`: Proveedor a configurar (cli, gemini, groq, openai, claude-api, zai)
 
 **Proveedores Disponibles:**
 
 - `cli`: Claude CLI (gratis con Claude Code PRO) - **Opción por defecto**
-- `claude-api`: Anthropic Claude API (requiere API key)
+- `gemini`: Google Gemini API (free tier disponible)
+- `groq`: Groq API (free tier disponible, extremadamente rápido)
 - `openai`: OpenAI API (requiere API key)
+- `claude-api`: Anthropic Claude API (requiere API key)
 - `zai`: Z.AI API (requiere API key)
 
 **Ejemplos:**
@@ -192,11 +196,17 @@ claude-init config
 # Configurar Claude CLI directamente
 claude-init config --provider cli
 
-# Configurar Claude API
-claude-init config --provider claude-api
+# Configurar Google Gemini
+claude-init config --provider gemini
+
+# Configurar Groq
+claude-init config --provider groq
 
 # Configurar OpenAI
 claude-init config --provider openai
+
+# Configurar Claude API
+claude-init config --provider claude-api
 
 # Configurar Z.AI
 claude-init config --provider zai
@@ -206,9 +216,59 @@ claude-init config --provider zai
 
 El comando `config` iniciará un wizard interactivo que te guiará paso a paso:
 
-1. **Selección de proveedor**: Elige entre Claude CLI, Claude API, OpenAI o Z.AI
+1. **Selección de proveedor**: Elige entre Claude CLI, Gemini, Groq, OpenAI, Claude API o Z.AI
 2. **API Key** (si aplica): Ingresa tu API key de forma segura
 3. **Configuración avanzada** (opcional): Base URL, modelo, max tokens
+
+### Cómo Obtener API Keys
+
+Cada proveedor de IA tiene su propio proceso para obtener API keys:
+
+#### Google Gemini API (Free Tier Disponible)
+
+1. Visita [Google AI Studio](https://aistudio.google.com/apikey)
+2. Inicia sesión con tu cuenta de Google
+3. Haz clic en "Create API Key" o "Crear API key"
+4. Copia tu API key
+
+**Free Tier Limits:**
+- 15 requests por minuto
+- 250,000 tokens por minuto
+- 1,000 requests por día (para Gemini 2.5 Flash Lite)
+
+#### Groq API (Free Tier Disponible)
+
+1. Visita [Groq Console](https://console.groq.com/keys)
+2. Inicia sesión o regístrate
+3. Haz clic en "Create API Key" o "Crear API key"
+4. Copia tu API key
+
+**Free Tier:** Límites generosos disponibles para modelos open-source (Llama, Mixtral, etc.)
+
+#### OpenAI API
+
+1. Visita [OpenAI Platform](https://platform.openai.com/account/api-keys)
+2. Inicia sesión con tu cuenta de OpenAI
+3. Haz clic en "Create new secret key" o "Crear nueva clave secreta"
+4. Copia tu API key (solo se muestra una vez)
+
+**Nota:** Requiere suscripción de pago. Modelos recomendados: `gpt-4o-mini` (coste-eficiente)
+
+#### Anthropic Claude API
+
+1. Visita [Anthropic Console](https://console.anthropic.com/settings/keys)
+2. Inicia sesión con tu cuenta de Anthropic
+3. Haz clic en "Create Key" o "Crear clave"
+4. Configura permisos y nombre para la clave
+5. Copia tu API key
+
+**Nota:** Requiere suscripción de pago. Modelos recomendados: `claude-opus-4`
+
+#### Z.AI API
+
+1. Visita [Z.AI](https://z.ai)
+2. Regístrate y obtén tu API key
+3. Configura en claude-init
 
 La configuración se guarda en `~/.config/claude-init/config.yaml` (macOS/Linux) o `%APPDATA%\claude-init\config.yaml` (Windows).
 
@@ -315,27 +375,49 @@ provider: cli
 providers:
   cli:
     # Claude CLI no requiere API key, solo Claude Code PRO
-  claude-api:
-    api_key: sk-ant-xxxxx
-    base_url: https://api.anthropic.com/v1/messages
-    model: claude-sonnet-4-20250514
-    max_tokens: 8192
+  gemini:
+    api_key: AIzaSyxxxxx
+    base_url: https://generativelanguage.googleapis.com/v1beta/models
+    model: gemini-2.5-flash
+    max_tokens: 1000000
+  groq:
+    api_key: gsk_xxxxx
+    base_url: https://api.groq.com/openai/v1
+    model: llama-3.3-70b-versatile
+    max_tokens: 32768
   openai:
     api_key: sk-xxxxx
     base_url: https://api.openai.com/v1
-    model: gpt-4o
-    max_tokens: 4096
+    model: gpt-4o-mini
+    max_tokens: 16384
+  claude-api:
+    api_key: sk-ant-xxxxx
+    base_url: https://api.anthropic.com/v1/messages
+    model: claude-opus-4
+    max_tokens: 200000
   zai:
     api_key: zai-xxxxx
     base_url: https://api.z.ai/v1
-    model: zai-large
-    max_tokens: 4096
+    model: glm-4.7
+    max_tokens: 204800
 ```
+
+### Modelos Recomendados
+
+| Proveedor | Modelo | Uso Recomendado | Contexto |
+|-----------|--------|-----------------|----------|
+| **Claude CLI** | - | Gratis con PRO | - |
+| **Gemini** | `gemini-2.5-flash` | Free tier disponible | 1M tokens |
+| **Groq** | `llama-3.3-70b-versatile` | Extremadamente rápido | 32K tokens |
+| **OpenAI** | `gpt-4o-mini` | Coste-eficiente | 16K tokens |
+| **Claude API** | `claude-opus-4` | Máxima capacidad | 200K tokens |
+| **Z.AI** | `glm-4.7` | Alternativa económica | 204K tokens |
 
 ### Notas Importantes
 
 - **Claude CLI** (`cli`): Es la opción por defecto y gratuita si tienes Claude Code PRO. No requiere API key.
-- **APIs de IA**: Requieren una suscripción activa y API key válida.
+- **Gemini** y **Groq**: Ofrecen capas gratuitas generosas, ideales para desarrollo y testing.
+- **APIs de IA de pago**: Requieren una suscripción activa y API key válida (OpenAI, Claude API, Z.AI).
 - **Configuración interactiva**: Usa `claude-init config` para configurar cualquier proveedor.
 
 ## Ejemplos
@@ -387,7 +469,9 @@ claude-init init --config-dir .ai-config
 
 - Go 1.25 o superior
 - make (opcional, para usar el Makefile)
-- Claude Code PRO (si usas el proveedor `cli`) o suscripción a una API de IA (claude-api, openai, zai)
+- Claude Code PRO (si usas el proveedor `cli`) o API key de IA:
+  - **Gratis**: Claude CLI (con PRO), Google Gemini (free tier), Groq (free tier)
+  - **De pago**: OpenAI, Claude API, Z.AI
 
 ### Estructura del Proyecto
 
@@ -401,7 +485,7 @@ ia_start/
 │   ├── version/           # Comando version
 │   └── completion/        # Comando completion
 ├── internal/
-│   ├── ai/                # Clientes de IA (Claude CLI, Claude API, OpenAI, Z.AI)
+│   ├── ai/                # Clientes de IA (Claude CLI, Gemini, Groq, OpenAI, Claude API, Z.AI)
 │   ├── claude/            # Analizador de proyectos y generador de contenido
 │   ├── config/            # Gestión de configuración
 │   ├── logger/            # Utilidades de logging

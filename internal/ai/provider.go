@@ -15,6 +15,12 @@ const (
 
 	// ProviderZAI usa z.ai API.
 	ProviderZAI Provider = "zai"
+
+	// ProviderGemini usa Google Gemini API.
+	ProviderGemini Provider = "gemini"
+
+	// ProviderGroq usa Groq API.
+	ProviderGroq Provider = "groq"
 )
 
 // String retorna el nombre del provider.
@@ -28,6 +34,10 @@ func (p Provider) String() string {
 		return "OpenAI"
 	case ProviderZAI:
 		return "Z.AI"
+	case ProviderGemini:
+		return "Gemini"
+	case ProviderGroq:
+		return "Groq"
 	default:
 		return "Unknown"
 	}
@@ -44,6 +54,10 @@ func (p Provider) Description() string {
 		return "OpenAI API (requiere API key, más rápido)"
 	case ProviderZAI:
 		return "Z.AI API (requiere API key, más rápido)"
+	case ProviderGemini:
+		return "Google Gemini API (free tier disponible, muy rápido)"
+	case ProviderGroq:
+		return "Groq API (free tier disponible, extremadamente rápido)"
 	default:
 		return "Proveedor desconocido"
 	}
@@ -61,13 +75,15 @@ func AllProviders() []Provider {
 		ProviderClaudeAPI,
 		ProviderOpenAI,
 		ProviderZAI,
+		ProviderGemini,
+		ProviderGroq,
 	}
 }
 
 // IsValid retorna true si el provider es válido.
 func (p Provider) IsValid() bool {
 	switch p {
-	case ProviderCLI, ProviderClaudeAPI, ProviderOpenAI, ProviderZAI:
+	case ProviderCLI, ProviderClaudeAPI, ProviderOpenAI, ProviderZAI, ProviderGemini, ProviderGroq:
 		return true
 	default:
 		return false

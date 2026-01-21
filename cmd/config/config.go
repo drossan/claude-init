@@ -20,8 +20,10 @@ or %APPDATA%\claude-init\config.yaml (Windows).
 
 Available providers:
 - cli: Claude CLI (free with Claude Code PRO)
-- claude-api: Anthropic Claude API (requires API key)
 - openai: OpenAI API (requires API key)
+- gemini: Google Gemini API (free tier available)
+- groq: Groq API (free tier available)
+- claude-api: Anthropic Claude API (requires API key)
 - zai: Z.AI API (requires API key)`,
 	RunE: runConfig,
 }
@@ -29,7 +31,7 @@ Available providers:
 var providerFlag string
 
 func init() {
-	Cmd.Flags().StringVarP(&providerFlag, "provider", "p", "", "Provider to configure (cli, claude-api, openai, zai)")
+	Cmd.Flags().StringVarP(&providerFlag, "provider", "p", "", "Provider to configure (cli, openai, gemini, groq, claude-api, zai)")
 }
 
 func runConfig(cmd *cobra.Command, args []string) error {
@@ -111,6 +113,8 @@ func askProvider() (string, error) {
 		Options: []string{
 			"Claude CLI (Free with Claude Code PRO)",
 			"OpenAI API",
+			"Google Gemini API (Free tier available)",
+			"Groq API (Free tier available)",
 			// "Claude API (Anthropic API)",
 			// "Z.AI API",
 		},
@@ -127,6 +131,10 @@ func askProvider() (string, error) {
 		return "cli", nil
 	case "OpenAI API":
 		return "openai", nil
+	case "Google Gemini API (Free tier available)":
+		return "gemini", nil
+	case "Groq API (Free tier available)":
+		return "groq", nil
 	// Comentado temporalmente - se usará más adelante
 	// case "Claude API (Anthropic API)":
 	// 	return "claude-api", nil
@@ -227,14 +235,26 @@ func getDefaultsForProvider(provider string) providerDefaults {
 	case "openai":
 		return providerDefaults{
 			baseURL:   "https://api.openai.com/v1",
-			model:     "gpt-5.1",
-			maxTokens: 100000, // GPT-5.1 soporta tokens extendidos
+			model:     "gpt-4o-mini",
+			maxTokens: 16384, // GPT-4o-mini soporta 16K completion tokens
 		}
 	case "zai":
 		return providerDefaults{
 			baseURL:   "https://api.z.ai/v1",
 			model:     "glm-4.7",
 			maxTokens: 204800, // GLM-4.7 tiene 204,800 tokens de contexto
+		}
+	case "gemini":
+		return providerDefaults{
+			baseURL:   "https://generativelanguage.googleapis.com/v1beta/models",
+			model:     "gemini-2.5-flash",
+			maxTokens: 1000000, // Gemini 2.5 Flash tiene 1M tokens
+		}
+	case "groq":
+		return providerDefaults{
+			baseURL:   "https://api.groq.com/openai/v1",
+			model:     "llama-3.3-70b-versatile",
+			maxTokens: 32768, // Groq soporta 32K context window
 		}
 	default:
 		return providerDefaults{
