@@ -761,9 +761,9 @@ func askAIProvider() (string, error) {
 		Message: "Selecciona el provider de IA a usar:",
 		Options: []string{
 			"Claude CLI (Gratis, más lento)",
-			"Claude API (Requiere API key, más rápido)",
 			"OpenAI API (Requiere API key, más rápido)",
-			"Z.AI API (Requiere API key, más rápido)",
+			// "Claude API (Requiere API key, más rápido)",
+			// "Z.AI API (Requiere API key, más rápido)",
 		},
 		Default: "Claude CLI (Gratis, más lento)",
 		Help:    "Claude CLI usa tu suscripción PRO existente. Las APIs requieren configuración previa y pago.",
@@ -777,12 +777,13 @@ func askAIProvider() (string, error) {
 	switch provider {
 	case "Claude CLI (Gratis, más lento)":
 		return "cli", nil
-	case "Claude API (Requiere API key, más rápido)":
-		return "claude-api", nil
 	case "OpenAI API (Requiere API key, más rápido)":
 		return "openai", nil
-	case "Z.AI API (Requiere API key, más rápido)":
-		return "zai", nil
+	// Comentado temporalmente - se usará más adelante
+	// case "Claude API (Requiere API key, más rápido)":
+	// 	return "claude-api", nil
+	// case "Z.AI API (Requiere API key, más rápido)":
+	// 	return "zai", nil
 	default:
 		return "cli", nil
 	}

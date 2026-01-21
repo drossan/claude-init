@@ -110,9 +110,9 @@ func askProvider() (string, error) {
 		Message: "Select AI provider to configure:",
 		Options: []string{
 			"Claude CLI (Free with Claude Code PRO)",
-			"Claude API (Anthropic API)",
 			"OpenAI API",
-			"Z.AI API",
+			// "Claude API (Anthropic API)",
+			// "Z.AI API",
 		},
 		Default: "Claude CLI (Free with Claude Code PRO)",
 	}
@@ -125,12 +125,13 @@ func askProvider() (string, error) {
 	switch provider {
 	case "Claude CLI (Free with Claude Code PRO)":
 		return "cli", nil
-	case "Claude API (Anthropic API)":
-		return "claude-api", nil
 	case "OpenAI API":
 		return "openai", nil
-	case "Z.AI API":
-		return "zai", nil
+	// Comentado temporalmente - se usará más adelante
+	// case "Claude API (Anthropic API)":
+	// 	return "claude-api", nil
+	// case "Z.AI API":
+	// 	return "zai", nil
 	default:
 		return "cli", nil
 	}
