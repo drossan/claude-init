@@ -46,10 +46,11 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 
 // chatRequest representa una solicitud a la API de chat de OpenAI.
 type chatRequest struct {
-	Model       string        `json:"model"`
-	Messages    []chatMessage `json:"messages"`
-	Temperature float32       `json:"temperature,omitempty"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
+	Model               string        `json:"model"`
+	Messages            []chatMessage `json:"messages"`
+	Temperature         float32       `json:"temperature,omitempty"`
+	MaxTokens           int           `json:"max_tokens,omitempty"`
+	MaxCompletionTokens int           `json:"max_completion_tokens,omitempty"`
 }
 
 // chatMessage representa un mensaje en la conversación.
@@ -99,11 +100,18 @@ func (c *Client) SendMessage(systemPrompt, userMessage string) (string, error) {
 		Content: userMessage,
 	})
 
+	// GPT-5 models require max_completion_tokens instead of max_tokens
 	reqBody := chatRequest{
 		Model:       c.model,
 		Messages:    messages,
 		Temperature: c.temperature,
-		MaxTokens:   c.maxTokens,
+	}
+
+	// Usar max_completion_tokens para modelos GPT-5, max_tokens para otros
+	if isGPT5Model(c.model) {
+		reqBody.MaxCompletionTokens = c.maxTokens
+	} else {
+		reqBody.MaxTokens = c.maxTokens
 	}
 
 	jsonData, err := json.Marshal(reqBody)
@@ -159,4 +167,28 @@ func (c *Client) SendSimpleMessage(message string) (string, error) {
 func (c *Client) Close() error {
 	// Nada que cerrar para el cliente HTTP básico
 	return nil
+}
+
+// isGPT5Model detecta si el modelo es un modelo GPT-5 que requiere max_completion_tokens.
+func isGPT5Model(model string) bool {
+	// Los modelos GPT-5 requieren max_completion_tokens en lugar de max_tokens
+	return contains(model, "gpt-5") && !contains(model, "gpt-4") && !contains(model, "gpt-3")
+}
+
+// contains verifica si una cadena contiene un substring (case-insensitive).
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr ||
+		len(s) > len(substr) && (s[:len(substr)] == substr ||
+			s[len(s)-len(substr):] == substr ||
+			findSubstring(s, substr)))
+}
+
+// findSubstring busca un substring en una cadena de forma case-insensitive.
+func findSubstring(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }
