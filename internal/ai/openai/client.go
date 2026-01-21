@@ -25,10 +25,10 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 		baseURL = "https://api.openai.com/v1"
 	}
 	if model == "" {
-		model = "gpt-4o"
+		model = "gpt-5.2-codex"
 	}
 	if maxTokens == 0 {
-		maxTokens = 16384 // Aumentado para permitir respuestas más detalladas como Claude
+		maxTokens = 100000 // GPT-5 soporta tokens extendidos
 	}
 	temperature := float32(0.7) // Balance entre creatividad y coherencia
 

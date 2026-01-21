@@ -2,7 +2,7 @@
 name: tester
 description: Especialista en testing de aplicaciones Go. Crea suites de tests completas siguiendo las mejores prácticas de testing en Go, incluyendo tablas de tests, mocks y tests de integración.
 tools: Read, Write, Edit, Bash
-model: sonnet
+model: claude-opus-4
 color: yellow
 ---
 

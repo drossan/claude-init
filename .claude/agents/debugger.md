@@ -2,7 +2,7 @@
 name: debugger
 description: Especialista en debugging de aplicaciones Go. Investiga y resuelve problemas complejos, analiza stack traces, identifica race conditions y soluciona memory leaks.
 tools: Read, Edit, Bash, Grep
-model: sonnet
+model: claude-opus-4
 color: red
 ---
 

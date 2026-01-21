@@ -2,7 +2,7 @@
 name: architect
 description: Especialista en diseño de arquitectura de CLIs y planificación de sistemas en Go. Responsable de definir la estructura de paquetes, interfaces y la interacción entre componentes siguiendo los principios SOLID y las mejores prácticas de Go.
 tools: Read, Write, Edit, Bash, Glob, Grep
-model: sonnet
+model: claude-opus-4
 color: blue
 ---
 

@@ -685,7 +685,7 @@ name: backend-engineer
 version: 1.0.0
 author: platform-team
 description: Senior Backend Engineer especializado en razonamiento sobre APIs REST y servicios backend
-model: claude-sonnet-4-20250514
+model: claude-opus-4
 color: "#3B82F6"
 type: reasoning
 autonomy_level: medium

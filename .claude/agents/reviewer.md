@@ -2,7 +2,7 @@
 name: reviewer
 description: Revisor de código especializado en Go. Valida el cumplimiento de las mejores prácticas, patrones de diseño, convenciones de idioma y seguridad del código.
 tools: Read, Edit
-model: sonnet
+model: claude-opus-4
 color: purple
 ---
 

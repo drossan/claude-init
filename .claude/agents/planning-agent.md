@@ -2,7 +2,7 @@
 name: planning-agent
 description: Planificador de tareas para el proyecto claude-init CLI. Descompone tareas complejas en pasos ejecutables, estima el esfuerzo necesario y crea planes detallados de implementación.
 tools: Read, Write, Edit, Bash, Glob
-model: sonnet
+model: claude-opus-4
 color: orange
 ---
 

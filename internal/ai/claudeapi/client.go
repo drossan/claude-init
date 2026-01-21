@@ -24,10 +24,10 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 		baseURL = "https://api.anthropic.com/v1/messages"
 	}
 	if model == "" {
-		model = "claude-sonnet-4-20250514"
+		model = "claude-opus-4"
 	}
 	if maxTokens == 0 {
-		maxTokens = 8192
+		maxTokens = 200000 // Claude Opus 4.5 tiene 200K tokens
 	}
 
 	return &Client{

@@ -2,7 +2,7 @@
 name: developer
 description: Desarrollador principal especializado en Go y CLI tools. Implementa la lógica de negocio, genera plantillas y maneja la integración con APIs externas.
 tools: Read, Write, Edit, Bash, Glob
-model: sonnet
+model: claude-opus-4
 color: green
 ---
 

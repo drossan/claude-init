@@ -220,20 +220,20 @@ func getDefaultsForProvider(provider string) providerDefaults {
 	case "claude-api":
 		return providerDefaults{
 			baseURL:   "https://api.anthropic.com/v1/messages",
-			model:     "claude-sonnet-4-20250514",
-			maxTokens: 8192,
+			model:     "claude-opus-4",
+			maxTokens: 200000, // Claude Opus 4 - 200K tokens
 		}
 	case "openai":
 		return providerDefaults{
 			baseURL:   "https://api.openai.com/v1",
-			model:     "gpt-4o",
-			maxTokens: 4096,
+			model:     "gpt-5.2-codex",
+			maxTokens: 100000, // GPT-5.2-Codex soporta tokens extendidos
 		}
 	case "zai":
 		return providerDefaults{
 			baseURL:   "https://api.z.ai/v1",
-			model:     "zai-large",
-			maxTokens: 4096,
+			model:     "glm-4.7",
+			maxTokens: 204800, // GLM-4.7 tiene 204,800 tokens de contexto
 		}
 	default:
 		return providerDefaults{

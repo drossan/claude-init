@@ -2,7 +2,7 @@
 name: orchestrator
 description: Orquestador maestro del flujo de desarrollo para claude-init CLI. Coordina la comunicación entre los agentes de arquitectura, desarrollo y testing para asegurar un CLI robusto y bien estructurado.
 tools: Read, Write, Edit, Bash, Glob
-model: sonnet
+model: claude-opus-4
 color: white
 ---
 

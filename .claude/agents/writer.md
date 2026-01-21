@@ -2,7 +2,7 @@
 name: writer
 description: Especialista en documentación técnica. Crea y mantiene la documentación del proyecto, incluyendo README, godoc, CHANGELOG y guías de usuario.
 tools: Read, Write, Edit
-model: sonnet
+model: claude-opus-4
 color: cyan
 ---
 

@@ -24,10 +24,10 @@ func NewClient(apiKey, baseURL, model string, maxTokens int) *Client {
 		baseURL = "https://api.z.ai/v1"
 	}
 	if model == "" {
-		model = "zai-large"
+		model = "glm-4.7"
 	}
 	if maxTokens == 0 {
-		maxTokens = 4096
+		maxTokens = 204800 // GLM-4.7 tiene 204,800 tokens de contexto
 	}
 
 	return &Client{

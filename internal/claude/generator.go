@@ -135,6 +135,7 @@ func (g *Generator) GenerateAgent(agentType string) error {
 	}
 
 	// Escribir archivo
+	content = g.cleanMarkdownOutput(content)
 	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("error escribiendo archivo agent %s: %w", agentType, err)
 	}
@@ -193,12 +194,36 @@ func (g *Generator) GenerateSkill(skillType, skillName string) error {
 	}
 
 	// Escribir archivo
+	content = g.cleanMarkdownOutput(content)
 	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("error escribiendo archivo skill %s: %w", skillName, err)
 	}
 
 	g.logger.Info("Skill %s generado en %s", skillName, outputPath)
 	return nil
+}
+
+// cleanMarkdownOutput limpia el contenido generado eliminando bloques de código markdown.
+// Elimina ```markdown al inicio y ``` al final si están presentes.
+func (g *Generator) cleanMarkdownOutput(content string) string {
+	content = strings.TrimSpace(content)
+
+	// Eliminar ```markdown al inicio
+	if strings.HasPrefix(content, "```markdown") {
+		content = strings.TrimPrefix(content, "```markdown")
+		content = strings.TrimLeft(content, "\n")
+	} else if strings.HasPrefix(content, "```") {
+		content = strings.TrimPrefix(content, "```")
+		content = strings.TrimLeft(content, "\n")
+	}
+
+	// Eliminar ``` al final
+	if strings.HasSuffix(content, "```") {
+		content = strings.TrimSuffix(content, "```")
+		content = strings.TrimRight(content, "\n")
+	}
+
+	return content
 }
 
 // GenerateCommand genera un archivo de comando usando templates base o Claude CLI.
@@ -266,6 +291,7 @@ func (g *Generator) GenerateCommandWithContext(commandType, agentsContext, skill
 	}
 
 	// Escribir archivo
+	content = g.cleanMarkdownOutput(content)
 	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
 		return fmt.Errorf("error escribiendo archivo command %s: %w", commandType, err)
 	}
@@ -577,7 +603,287 @@ func (g *Generator) getDefaultRecommendation() *Recommendation {
 		rec.Skills = append(rec.Skills, sanitizeFilename(g.answers.Framework))
 	}
 
+	// Detectar y agregar skills adicionales basadas en dependencias del proyecto
+	additionalSkills := g.detectAdditionalSkills()
+	for _, skill := range additionalSkills {
+		// Evitar duplicados
+		if !contains(rec.Skills, skill) {
+			rec.Skills = append(rec.Skills, skill)
+		}
+	}
+
 	return rec
+}
+
+// detectAdditionalSkills detecta skills adicionales basadas en las dependencias del proyecto.
+// Detecta bases de datos, ORMs y librerías importantes que deberían tener su propia skill.
+func (g *Generator) detectAdditionalSkills() []string {
+	var skills []string
+
+	// Analizar package.json si existe (Node.js/TypeScript)
+	if pkgInfo := g.analyzePackageJSONDependencies(); pkgInfo != "" {
+		skills = append(skills, g.detectPackageJSONSkills(pkgInfo)...)
+	}
+
+	// Analizar go.mod si existe (Go)
+	if goDeps := g.analyzeGoMod(); goDeps != "" {
+		skills = append(skills, g.detectGoSkills(goDeps)...)
+	}
+
+	// Analizar requirements.txt si existe (Python)
+	if reqs := g.analyzeRequirementsTxt(); reqs != "" {
+		skills = append(skills, g.detectPythonSkills(reqs)...)
+	}
+
+	return skills
+}
+
+// analyzePackageJSONDependencies analiza las dependencias del package.json.
+func (g *Generator) analyzePackageJSONDependencies() string {
+	pkgPath := filepath.Join(g.projectPath, "package.json")
+	content, err := os.ReadFile(pkgPath)
+	if err != nil {
+		return ""
+	}
+
+	var pkg struct {
+		Dependencies    map[string]string `json:"dependencies"`
+		DevDependencies map[string]string `json:"devDependencies"`
+	}
+
+	if err := json.Unmarshal(content, &pkg); err != nil {
+		return ""
+	}
+
+	var deps []string
+	for name := range pkg.Dependencies {
+		deps = append(deps, name)
+	}
+	for name := range pkg.DevDependencies {
+		deps = append(deps, name)
+	}
+
+	return strings.Join(deps, ",")
+}
+
+// detectPackageJSONSkills detecta skills basadas en dependencias de Node.js/TypeScript.
+func (g *Generator) detectPackageJSONSkills(depsStr string) []string {
+	deps := strings.Split(depsStr, ",")
+	var skills []string
+	skillMap := make(map[string]bool)
+
+	// Mapeo de dependencias a skills
+	dependencySkills := map[string]string{
+		// Bases de datos
+		"mysql":          "mysql",
+		"pg":             "postgresql",
+		"postgres":       "postgresql",
+		"mongoose":       "mongodb",
+		"mongodb":        "mongodb",
+		"redis":          "redis",
+		"sqlite3":        "sqlite",
+		"better-sqlite3": "sqlite",
+
+		// ORMs
+		"typeorm":   "typeorm",
+		"prisma":    "prisma",
+		"sequelize": "sequelize",
+		"mikro-orm": "mikro-orm",
+
+		// Validación
+		"zod":             "zod",
+		"joi":             "joi",
+		"yup":             "yup",
+		"class-validator": "class-validator",
+
+		// Testing
+		"jest":                   "jest",
+		"vitest":                 "vitest",
+		"mocha":                  "mocha",
+		"cypress":                "cypress",
+		"playwright":             "playwright",
+		"@testing-library/react": "testing-library",
+		"@testing-library/vue":   "testing-library",
+
+		// Frameworks
+		"react":   "react",
+		"vue":     "vue",
+		"angular": "angular",
+		"next":    "nextjs",
+		"nuxt":    "nuxtjs",
+		"svelte":  "svelte",
+		"express": "express",
+		"fastify": "fastify",
+		"nest":    "nestjs",
+	}
+
+	for _, dep := range deps {
+		dep = strings.TrimSpace(strings.ToLower(dep))
+		for key, skill := range dependencySkills {
+			if strings.Contains(dep, key) && !skillMap[skill] {
+				skills = append(skills, skill)
+				skillMap[skill] = true
+			}
+		}
+	}
+
+	return skills
+}
+
+// analyzeGoMod analiza go.mod si existe.
+func (g *Generator) analyzeGoMod() string {
+	modPath := filepath.Join(g.projectPath, "go.mod")
+	content, err := os.ReadFile(modPath)
+	if err != nil {
+		return ""
+	}
+
+	// Extraer dependencias buscando líneas que empiezan con requerimientos
+	var deps []string
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "require ") || strings.HasPrefix(line, "\trequire ") {
+			// Extraer el nombre del paquete (primer elemento después de require)
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				// Eliminar comillas del nombre
+				depName := strings.Trim(parts[1], `"`)
+				deps = append(deps, depName)
+			}
+		}
+	}
+
+	return strings.Join(deps, ",")
+}
+
+// detectGoSkills detecta skills basadas en dependencias de Go.
+func (g *Generator) detectGoSkills(depsStr string) []string {
+	deps := strings.Split(depsStr, ",")
+	var skills []string
+	skillMap := make(map[string]bool)
+
+	dependencySkills := map[string]string{
+		// Bases de datos
+		"mysql":    "mysql",
+		"postgres": "postgresql",
+		"pq":       "postgresql",
+		"pgx":      "postgresql",
+		"mongo":    "mongodb",
+		"mongodb":  "mongodb",
+		"redis":    "redis",
+		"sqlite":   "sqlite",
+
+		// ORMs
+		"gorm": "gorm",
+		"sqlx": "sqlx",
+		"ent":  "ent",
+		"sqlc": "sqlc",
+
+		// Frameworks
+		"gin":   "gin",
+		"echo":  "echo",
+		"fiber": "fiber",
+		"chi":   "chi",
+	}
+
+	for _, dep := range deps {
+		dep = strings.TrimSpace(dep)
+		// Extraer solo el nombre base (sin versión)
+		if parts := strings.Split(dep, " "); len(parts) > 0 {
+			dep = parts[0]
+		}
+		for key, skill := range dependencySkills {
+			if strings.Contains(dep, key) && !skillMap[skill] {
+				skills = append(skills, skill)
+				skillMap[skill] = true
+			}
+		}
+	}
+
+	return skills
+}
+
+// analyzeRequirementsTxt analiza requirements.txt si existe.
+func (g *Generator) analyzeRequirementsTxt() string {
+	reqPath := filepath.Join(g.projectPath, "requirements.txt")
+	content, err := os.ReadFile(reqPath)
+	if err != nil {
+		return ""
+	}
+
+	lines := strings.Split(string(content), "\n")
+	var deps []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		// Ignorar comentarios y líneas vacías
+		if line != "" && !strings.HasPrefix(line, "#") {
+			// Extraer nombre del paquete (antes de ==)
+			if parts := strings.Split(line, "=="); len(parts) > 0 {
+				deps = append(deps, strings.ToLower(parts[0]))
+			} else {
+				deps = append(deps, strings.ToLower(line))
+			}
+		}
+	}
+
+	return strings.Join(deps, ",")
+}
+
+// detectPythonSkills detecta skills basadas en dependencias de Python.
+func (g *Generator) detectPythonSkills(depsStr string) []string {
+	deps := strings.Split(depsStr, ",")
+	var skills []string
+	skillMap := make(map[string]bool)
+
+	dependencySkills := map[string]string{
+		// Bases de datos
+		"mysql":    "mysql",
+		"postgres": "postgresql",
+		"psycopg2": "postgresql",
+		"pymongo":  "mongodb",
+		"redis":    "redis",
+		"sqlite3":  "sqlite",
+
+		// ORMs
+		"sqlalchemy":       "sqlalchemy",
+		"django":           "django",
+		"flask-sqlalchemy": "flask-sqlalchemy",
+		"tortoise":         "tortoise-orm",
+
+		// Frameworks
+		"flask":   "flask",
+		"fastapi": "fastapi",
+
+		// Validación
+		"pydantic":    "pydantic",
+		"marshmallow": "marshmallow",
+
+		// Testing
+		"pytest": "pytest",
+	}
+
+	for _, dep := range deps {
+		dep = strings.TrimSpace(dep)
+		for key, skill := range dependencySkills {
+			if strings.Contains(dep, key) && !skillMap[skill] {
+				skills = append(skills, skill)
+				skillMap[skill] = true
+			}
+		}
+	}
+
+	return skills
+}
+
+// contains verifica si un slice contiene un string.
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
 
 // BaseItems contiene los items base que siempre deben estar presentes.

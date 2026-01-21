@@ -744,11 +744,11 @@ func getDefaultBaseURL(provider string) string {
 func getDefaultModel(provider string) string {
 	switch provider {
 	case "claude-api":
-		return "claude-sonnet-4-20250514"
+		return "claude-opus-4"
 	case "openai":
-		return "gpt-4o"
+		return "gpt-5.2-codex"
 	case "zai":
-		return "zai-large"
+		return "glm-4.7"
 	default:
 		return ""
 	}
