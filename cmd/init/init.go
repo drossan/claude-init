@@ -746,7 +746,7 @@ func getDefaultModel(provider string) string {
 	case "claude-api":
 		return "claude-opus-4"
 	case "openai":
-		return "gpt-5.2-codex"
+		return "gpt-5.1"
 	case "zai":
 		return "glm-4.7"
 	default:

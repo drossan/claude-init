@@ -226,8 +226,8 @@ func getDefaultsForProvider(provider string) providerDefaults {
 	case "openai":
 		return providerDefaults{
 			baseURL:   "https://api.openai.com/v1",
-			model:     "gpt-5.2-codex",
-			maxTokens: 100000, // GPT-5.2-Codex soporta tokens extendidos
+			model:     "gpt-5.1",
+			maxTokens: 100000, // GPT-5.1 soporta tokens extendidos
 		}
 	case "zai":
 		return providerDefaults{
