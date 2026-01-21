@@ -4,7 +4,8 @@
 
 Los commands son **orquestadores de tareas**.
 
-Su responsabilidad es analizar una solicitud, definir la estrategia de ejecución, seleccionar los agentes y skills más adecuados, y coordinar el trabajo, **sin modificar código directamente**.
+Su responsabilidad es analizar una solicitud, definir la estrategia de ejecución, seleccionar los agentes y skills más
+adecuados, y coordinar el trabajo, **sin modificar código directamente**.
 
 **Un command no ejecuta trabajo técnico, sino que decide quién y cómo debe ejecutarse.**
 
@@ -23,11 +24,13 @@ Su responsabilidad es analizar una solicitud, definir la estrategia de ejecució
 #### Reglas obligatorias
 
 ❌ **No pueden**:
+
 - Crear código
 - Modificar archivos
 - Eliminar archivos
 
 ✅ **Deben**:
+
 - Analizar la tarea solicitada
 - Seleccionar el/los agente(s) y skill(s) que mejor se adapten a la tarea
     - Puede ser uno o varios agentes
@@ -36,6 +39,9 @@ Su responsabilidad es analizar una solicitud, definir la estrategia de ejecució
 - Generar un plan de trabajo en Markdown
 - Guardarlo en `.claude/plans/`
 - Dejarlo pendiente de aprobación
+- El trabajo del command en el momento que se ha elaborado el plan y el usuario lo ha aprobado. Es imperativo que los
+  commands no toquen código, a no ser que sea el comamnd especifico de planes y el usuario haya indicado que se inicie
+  ese plan.
 
 📌 **Excepción única**: Solo el command `plan-manager` puede iniciar, aprobar o ejecutar planes.
 
@@ -100,6 +106,7 @@ dependencies: [other-commands, mcps]
 
 {Descripción detallada del propósito del command, su alcance y el resultado esperado.
 Debe dejar claro si:
+
 - Genera un plan
 - Ejecuta validaciones
 - Orquesta otros commands
@@ -161,14 +168,14 @@ El command debe **elegir explícitamente** los agentes y skills más adecuados u
 
 ### Criterios de Selección
 
-| Criterio | Peso | Agentes Candidatos |
-|----------|------|-------------------|
-| Complejidad técnica | Alta | `senior-developer`, `architect` |
-| Impacto en arquitectura | Alta | `architect`, `tech-lead` |
+| Criterio                          | Peso  | Agentes Candidatos                          |
+|-----------------------------------|-------|---------------------------------------------|
+| Complejidad técnica               | Alta  | `senior-developer`, `architect`             |
+| Impacto en arquitectura           | Alta  | `architect`, `tech-lead`                    |
 | Tareas repetitivas/automatizables | Media | `junior-developer`, `automation-specialist` |
-| Validaciones críticas | Alta | `qa-engineer`, `security-expert` |
-| Documentación técnica | Media | `tech-writer`, `developer` |
-| Optimización de rendimiento | Alta | `performance-engineer`, `senior-developer` |
+| Validaciones críticas             | Alta  | `qa-engineer`, `security-expert`            |
+| Documentación técnica             | Media | `tech-writer`, `developer`                  |
+| Optimización de rendimiento       | Alta  | `performance-engineer`, `senior-developer`  |
 
 ### Ejemplo de Asignación RACI
 
@@ -176,14 +183,14 @@ El command debe **elegir explícitamente** los agentes y skills más adecuados u
 fase_1_diseño:
   responsible: architect
   accountable: tech-lead
-  consulted: [api-design, security-analysis]
-  informed: [product-manager]
-  
+  consulted: [ api-design, security-analysis ]
+  informed: [ product-manager ]
+
 fase_2_implementacion:
   responsible: backend-developer
   accountable: architect
-  consulted: [code-generation, testing, database-design]
-  informed: [qa-engineer]
+  consulted: [ code-generation, testing, database-design ]
+  informed: [ qa-engineer ]
 ```
 
 > ⚠️ **La omisión de esta sección invalida el command.**
@@ -197,17 +204,20 @@ Cada fase debe estar asignada a **un agente concreto** con **responsabilidades c
 **Objetivo**: {Resultado esperado de esta fase}
 
 **Tareas**:
+
 - {Paso concreto y verificable}
 - {Paso concreto y verificable}
 - {Paso concreto y verificable}
 
 **Asignación**:
+
 - **Agente**: {agent-name}
 - **Skills**: `{skill-1}`, `{skill-2}`, `{skill-3}`
 - **MCPs**: `{mcp-1}` (opcional)
 - **Validador**: {agent-name-validator}
 
 **Criterios de Salida**:
+
 - [ ] {Condición verificable 1}
 - [ ] {Condición verificable 2}
 
@@ -218,16 +228,19 @@ Cada fase debe estar asignada a **un agente concreto** con **responsabilidades c
 **Objetivo**: {Resultado esperado de esta fase}
 
 **Tareas**:
+
 - {Paso concreto y verificable}
 - {Paso concreto y verificable}
 
 **Asignación**:
+
 - **Agente**: {agent-name}
 - **Skills**: `{skill-1}`, `{skill-2}`
 - **Dependencias**: Fase 1 completada
 - **Validador**: {agent-name-validator}
 
 **Criterios de Salida**:
+
 - [ ] {Condición verificable 1}
 - [ ] {Condición verificable 2}
 
@@ -238,52 +251,57 @@ Cada fase debe estar asignada a **un agente concreto** con **responsabilidades c
 **Objetivo**: {Resultado esperado de esta fase}
 
 **Tareas**:
+
 - {Paso concreto y verificable}
 - {Paso concreto y verificable}
 
 **Asignación**:
+
 - **Agente**: {agent-name}
 - **Skills**: `{skill-1}`, `{skill-2}`
 - **Validador**: {agent-name-validator}
 
 **Criterios de Salida**:
+
 - [ ] {Condición verificable 1}
 - [ ] {Condición verificable 2}
 
 ## Uso de otros Commands y MCPs
 
 {Indicar explícitamente si el command:
+
 - Invoca otros commands (listar cuáles y por qué)
 - Utiliza MCPs del proyecto (especificar configuración necesaria)
 - Comparte o consume contexto (formato y ubicación)
 - Genera eventos para otros commands}
 
 **Ejemplo**:
+
 ```yaml
 commands_invocados:
   - name: code-analyzer
     trigger: pre-ejecución
     output_required: metrics.json
-    
+
 mcps_utilizados:
   - name: database-schema-validator
     config: .claude/mcp-configs/db-validator.json
-    
+
 contexto_compartido:
   location: .claude/context/shared-state.json
   format: JSON
-  consumers: [qa-automation, deployment-manager]
+  consumers: [ qa-automation, deployment-manager ]
 ```
 
 ## Output y Artefactos
 
-| Artefacto | Ubicación | Formato | Validador | Obligatorio |
-|-----------|-----------|---------|-----------|-------------|
-| Plan técnico | `.claude/plans/{timestamp}-{command-name}.md` | Markdown | `plan-validator` | Sí (planning) |
-| Diagrama de arquitectura | `.claude/diagrams/{id}.mmd` | Mermaid | - | No |
-| Checklist de validación | `.claude/checklists/{id}.json` | JSON | `schema-validator` | Sí |
-| Reporte de análisis | `.claude/reports/{id}.md` | Markdown | - | Sí (executable) |
-| Log de ejecución | `.claude/logs/{command-name}-{date}.log` | Plain text | - | Sí |
+| Artefacto                | Ubicación                                     | Formato    | Validador          | Obligatorio     |
+|--------------------------|-----------------------------------------------|------------|--------------------|-----------------|
+| Plan técnico             | `.claude/plans/{timestamp}-{command-name}.md` | Markdown   | `plan-validator`   | Sí (planning)   |
+| Diagrama de arquitectura | `.claude/diagrams/{id}.mmd`                   | Mermaid    | -                  | No              |
+| Checklist de validación  | `.claude/checklists/{id}.json`                | JSON       | `schema-validator` | Sí              |
+| Reporte de análisis      | `.claude/reports/{id}.md`                     | Markdown   | -                  | Sí (executable) |
+| Log de ejecución         | `.claude/logs/{command-name}-{date}.log`      | Plain text | -                  | Sí              |
 
 ## Rollback y Cancelación
 
@@ -312,7 +330,8 @@ Si el command falla o el usuario cancela durante la ejecución:
 ## Reglas Críticas
 
 - **No modificación de código**: Bajo ningún concepto este command puede crear, modificar o eliminar archivos de código
-- **Selección obligatoria de agentes**: El command debe elegir explícitamente los agentes y skills adecuados usando el framework RACI
+- **Selección obligatoria de agentes**: El command debe elegir explícitamente los agentes y skills adecuados usando el
+  framework RACI
 - **Planificación obligatoria**: Si hay impacto en código, debe generarse un plan en `.claude/plans/`
 - **Separación de responsabilidades**: Commands orquestan, agentes ejecutan
 - **Ejecución restringida**: Solo `plan-manager` puede ejecutar planes
@@ -329,10 +348,12 @@ Debe guiar al usuario sobre qué información proporcionar.
 
 Ejemplo:
 "Describe la feature que deseas implementar, incluyendo:
+
 - Funcionalidad deseada
 - Restricciones técnicas
 - Criterios de aceptación
 - Prioridad y timeline"}
+
 ```
 
 ---
@@ -358,32 +379,34 @@ Ejemplo:
 ### 4.2 Estructura de Directorios
 
 ```
+
 .claude/
 ├── commands/
-│   ├── planning/
-│   │   ├── feature-planner.md
-│   │   ├── refactor-analyzer.md
-│   │   └── migration-coordinator.md
-│   ├── executable/
-│   │   ├── lint-runner.md
-│   │   ├── security-audit.md
-│   │   └── dependency-checker.md
-│   └── meta/
-│       └── plan-manager.md
+│ ├── planning/
+│ │ ├── feature-planner.md
+│ │ ├── refactor-analyzer.md
+│ │ └── migration-coordinator.md
+│ ├── executable/
+│ │ ├── lint-runner.md
+│ │ ├── security-audit.md
+│ │ └── dependency-checker.md
+│ └── meta/
+│ └── plan-manager.md
 ├── plans/
-│   ├── 20250120-143022-feature-planner.md
-│   └── 20250120-150033-refactor-analyzer.md
+│ ├── 20250120-143022-feature-planner.md
+│ └── 20250120-150033-refactor-analyzer.md
 ├── logs/
-│   ├── feature-planner-2025-01-20.log
-│   └── cancelled-20250120-143555.log
+│ ├── feature-planner-2025-01-20.log
+│ └── cancelled-20250120-143555.log
 ├── reports/
-│   └── security-audit-20250120.md
+│ └── security-audit-20250120.md
 ├── diagrams/
-│   └── architecture-oauth2.mmd
+│ └── architecture-oauth2.mmd
 ├── checklists/
-│   └── feature-validation.json
+│ └── feature-validation.json
 └── context/
 └── shared-state.json
+
 ```
 
 ---
@@ -401,6 +424,7 @@ description: Analiza, planifica, ejecuta y valida cualquier tarea
 ```
 
 **Solución**: Dividir en commands especializados:
+
 - `analyze-requirements` (executable)
 - `plan-implementation` (planning)
 - `validate-output` (executable)
@@ -412,8 +436,10 @@ description: Analiza, planifica, ejecuta y valida cualquier tarea
 **Problema**: El command especifica línea por línea qué debe hacer el agente, eliminando su autonomía.
 
 **Ejemplo**:
+
 ```markdown
 ### Fase 1
+
 - Crear variable `authToken` de tipo string
 - Inicializarla en null
 - Crear función `validateToken(token: string): boolean`
@@ -421,8 +447,10 @@ description: Analiza, planifica, ejecuta y valida cualquier tarea
 ```
 
 **Solución**: Delegar la implementación, solo definir requisitos:
+
 ```markdown
 ### Fase 1: Gestión de Tokens (backend-developer)
+
 - Implementar sistema de validación de tokens JWT
 - Criterios: soporte RS256, expiración configurable, refresh tokens
 - Skills: `auth-design`, `code-generation`
@@ -435,11 +463,13 @@ description: Analiza, planifica, ejecuta y valida cualquier tarea
 **Problema**: Command A invoca B, que invoca A, creando un loop infinito.
 
 **Ejemplo**:
+
 ```
 refactor-planner → code-analyzer → quality-checker → refactor-planner
 ```
 
 **Solución**: Detectar ciclos en el análisis previo:
+
 ```json
 {
   "validation_passed": false,
@@ -466,6 +496,7 @@ refactor-planner → code-analyzer → quality-checker → refactor-planner
 **Problema**: El command falla pero no registra logs ni notifica al usuario.
 
 **Solución**: Todo fallo debe:
+
 1. Escribir en `.claude/logs/`
 2. Retornar JSON con error detallado
 3. Ejecutar procedimiento de rollback
@@ -523,6 +554,7 @@ dependencies: [security-audit, api-design-validator]
 ## Objetivo
 
 Analizar una solicitud de nueva funcionalidad para una API REST y generar un plan técnico detallado que incluya:
+
 - Diseño de endpoints
 - Validaciones de seguridad
 - Estrategia de testing
@@ -563,8 +595,8 @@ Analizar una solicitud de nueva funcionalidad para una API REST y generar un pla
 ```yaml
 responsible: security-expert
 accountable: architect
-consulted: [security-analysis, threat-modeling, oauth-design]
-informed: [compliance-team]
+consulted: [ security-analysis, threat-modeling, oauth-design ]
+informed: [ compliance-team ]
 ```
 
 ### Fase 2: Diseño de API
@@ -572,8 +604,8 @@ informed: [compliance-team]
 ```yaml
 responsible: api-architect
 accountable: tech-lead
-consulted: [api-design, openapi-generation, versioning-strategy]
-informed: [frontend-team, mobile-team]
+consulted: [ api-design, openapi-generation, versioning-strategy ]
+informed: [ frontend-team, mobile-team ]
 ```
 
 ### Fase 3: Implementación
@@ -581,8 +613,8 @@ informed: [frontend-team, mobile-team]
 ```yaml
 responsible: backend-developer
 accountable: senior-developer
-consulted: [code-generation, testing, database-design]
-informed: [qa-engineer, devops-team]
+consulted: [ code-generation, testing, database-design ]
+informed: [ qa-engineer, devops-team ]
 ```
 
 ## Flujo de Trabajo Orquestado
@@ -592,18 +624,21 @@ informed: [qa-engineer, devops-team]
 **Objetivo**: Definir requisitos de autenticación y autorización
 
 **Tareas**:
+
 - Evaluar si la feature requiere OAuth2, API Keys o JWT
 - Identificar datos sensibles en el payload
 - Definir rate limiting necesario
 - Documentar posibles vectores de ataque
 
 **Asignación**:
+
 - **Agente**: security-expert
 - **Skills**: `security-analysis`, `threat-modeling`, `oauth-design`
 - **MCPs**: `owasp-validator`
 - **Validador**: architect
 
 **Criterios de Salida**:
+
 - [ ] Documento de análisis de amenazas generado
 - [ ] Estrategia de autenticación definida
 - [ ] Rate limits especificados
@@ -615,18 +650,21 @@ informed: [qa-engineer, devops-team]
 **Objetivo**: Definir la estructura de los endpoints y contratos de datos
 
 **Tareas**:
+
 - Diseñar URIs según convenciones RESTful
 - Definir esquemas JSON (request/response)
 - Generar especificación OpenAPI 3.0
 - Validar versionado de API
 
 **Asignación**:
+
 - **Agente**: api-architect
 - **Skills**: `api-design`, `openapi-generation`, `versioning-strategy`
 - **Dependencias**: Fase 1 completada
 - **Validador**: tech-lead
 
 **Criterios de Salida**:
+
 - [ ] Especificación OpenAPI generada y validada
 - [ ] Endpoints documentados con ejemplos
 - [ ] Estrategia de versionado aprobada
@@ -638,18 +676,21 @@ informed: [qa-engineer, devops-team]
 **Objetivo**: Generar el código base de los endpoints
 
 **Tareas**:
+
 - Implementar controllers con validación de input
 - Crear servicios de lógica de negocio
 - Implementar capa de persistencia (si aplica)
 - Escribir tests unitarios y de integración
 
 **Asignación**:
+
 - **Agente**: backend-developer
 - **Skills**: `code-generation`, `testing`, `database-design`
 - **Dependencias**: Fase 2 completada
 - **Validador**: senior-developer
 
 **Criterios de Salida**:
+
 - [ ] Código implementado con coverage >80%
 - [ ] Tests de integración pasando
 - [ ] Documentación técnica actualizada
@@ -661,7 +702,7 @@ commands_invocados:
   - name: security-audit
     trigger: post-fase-1
     output_required: security-report.json
-    
+
   - name: api-design-validator
     trigger: post-fase-2
     output_required: openapi-validation.json
@@ -670,7 +711,7 @@ mcps_utilizados:
   - name: owasp-validator
     config: .claude/mcp-configs/owasp.json
     purpose: Validar contra top 10 de OWASP
-    
+
   - name: database-schema-validator
     config: .claude/mcp-configs/db-validator.json
     purpose: Verificar migraciones compatibles
@@ -678,12 +719,12 @@ mcps_utilizados:
 
 ## Output y Artefactos
 
-| Artefacto | Ubicación | Formato | Validador | Obligatorio |
-|-----------|-----------|---------|-----------|-------------|
-| Plan técnico | `.claude/plans/{timestamp}-api-feature.md` | Markdown | `plan-validator` | Sí |
-| Especificación OpenAPI | `.claude/specs/api-v2-{feature}.yaml` | YAML | `openapi-validator` | Sí |
-| Diagrama de secuencia | `.claude/diagrams/api-flow.mmd` | Mermaid | - | No |
-| Checklist de seguridad | `.claude/checklists/security-{feature}.json` | JSON | `schema-validator` | Sí |
+| Artefacto              | Ubicación                                    | Formato  | Validador           | Obligatorio |
+|------------------------|----------------------------------------------|----------|---------------------|-------------|
+| Plan técnico           | `.claude/plans/{timestamp}-api-feature.md`   | Markdown | `plan-validator`    | Sí          |
+| Especificación OpenAPI | `.claude/specs/api-v2-{feature}.yaml`        | YAML     | `openapi-validator` | Sí          |
+| Diagrama de secuencia  | `.claude/diagrams/api-flow.mmd`              | Mermaid  | -                   | No          |
+| Checklist de seguridad | `.claude/checklists/security-{feature}.json` | JSON     | `schema-validator`  | Sí          |
 
 ## Rollback y Cancelación
 
@@ -714,7 +755,10 @@ Describe la feature de API que deseas implementar, incluyendo:
 6. **Prioridad**: ¿Urgencia? (crítica, alta, media, baja)
 
 **Ejemplo de solicitud válida**:
-> "Necesito implementar autenticación OAuth2 para permitir que aplicaciones de terceros accedan a nuestra API. Endpoints: POST /api/v2/oauth/authorize, POST /api/v2/oauth/token. Debe soportar Authorization Code Grant. SLA: <500ms p99. Prioridad: alta."
+> "Necesito implementar autenticación OAuth2 para permitir que aplicaciones de terceros accedan a nuestra API.
+> Endpoints: POST /api/v2/oauth/authorize, POST /api/v2/oauth/token. Debe soportar Authorization Code Grant. SLA: <500ms
+> p99. Prioridad: alta."
+
 ```
 
 ---

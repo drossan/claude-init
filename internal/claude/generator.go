@@ -538,7 +538,7 @@ func (g *Generator) getReadmeContent(readmeType string) string {
 func (g *Generator) buildSystemPrompt() string {
 	return `Eres un experto en desarrollo de software y generacion de configuraciones para proyectos.
 
-Tu tarea es generar archivos de configuracion para agentes, comandos y skills de desarrollo asistido por IA.
+Tu tarea es generar archivos de configuracion de claude code para agentes, comandos y skills de desarrollo asistido por IA.
 
 Debes ser preciso y generar contenido que sea directamente utilizable sin necesidad de edicion posterior.`
 }
@@ -579,16 +579,6 @@ func (g *Generator) getDefaultRecommendation() *Recommendation {
 
 	return rec
 }
-
-// Constants para los agents/commands/skills base que siempre deben estar presentes.
-const (
-	// Agents base obligatorios
-	baseAgents = "architect,writer,debugger,planning-agent,orchestrator-agent"
-	// Commands base obligatorios
-	baseCommands = "plan-manage,orchestrator,pre-flight"
-	// Skills base obligatorios
-	baseSkills = "technical-writer,code-reviewer,debug-master"
-)
 
 // BaseItems contiene los items base que siempre deben estar presentes.
 type BaseItems struct {
@@ -960,8 +950,6 @@ func (g *Generator) buildAgentsReadmeContent(agents []*AgentInfo) string {
 	sb.WriteString("## Uso de los Agentes\n\n")
 	sb.WriteString("Los agentes se definen en los comandos del directorio `commands/`. ")
 	sb.WriteString("Cada comando orquesta uno o más agentes para ejecutar una tarea específica.\n\n")
-	sb.WriteString("Para más información sobre cómo se crean estos agentes, ")
-	sb.WriteString("consulta las guías en `.claude/embeds/agent_guide.md`.\n")
 
 	return sb.String()
 }
@@ -1086,150 +1074,16 @@ func (g *Generator) buildSkillsReadmeContent(skills []*SkillInfo) string {
 	sb.WriteString("  - http-client\n")
 	sb.WriteString("---\n")
 	sb.WriteString("```\n\n")
-	sb.WriteString("Para más información sobre cómo se crean estas skills, ")
-	sb.WriteString("consulta las guías en `.claude/embeds/skill_guide.md`.\n")
 
 	return sb.String()
 }
 
 // getEmbeddedAgentTemplate retorna un template incrustado para un agente.
+// Deprecated: Los templates incrustados fueron eliminados para evitar duplicación con las guías.
+// Ahora siempre se usa IA con la guía completa (agent_guide.md).
 func (g *Generator) getEmbeddedAgentTemplate(agentType string) string {
-	roleDesc := g.getAgentRoleDescription(agentType)
-	agentColor := g.getAgentColor(agentType)
-	agentTools := g.getAgentToolsList(agentType)
-
-	// Skills según tipo de agente
-	skills := g.getAgentSkills(agentType)
-
-	return fmt.Sprintf(`---
-name: %s
-description: %s
-tools: %s
-model: sonnet
-color: %s
----
-
-# Agente %s (%s) - %s
-
-## Rol
-%s
-
-## Tu Especialidad
-Tu maestría técnica se fundamenta en las **skills** que se te proporcionan en cada intervención:
-%s
-
-## Proceso de Trabajo
-1. **Análisis**: Comprender el contexto y los requisitos de la tarea.
-2. **Planificación**: Desglosar la tarea en pasos accionables.
-3. **Implementación**: Ejecutar siguiendo las mejores prácticas de %s.
-4. **Validación**: Asegurar que el resultado cumple con los estándares de calidad.
-5. **Documentación**: Registrar decisiones y patrones aplicados.
-
-## Convenciones de Código
-- **Tipado**: Seguir las convenciones de tipo de %s.
-- **Naming**: Usar convenciones estándar del lenguaje.
-- **Estructura**: Mantener una organización clara y modular.
-- **Estilo**: Seguir las guías de estilo del proyecto.
-
-## Reglas de Oro
-- **Calidad**: Priorizar código limpio y mantenible.
-- **Testing**: Asegurar cobertura de pruebas adecuada.
-- **Documentación**: Documentar código complejo y decisiones arquitectónicas.
-- **Colaboración**: Coordinar con otros agentes cuando sea necesario.`,
-		agentType,
-		roleDesc,
-		agentTools,
-		agentColor,
-		capitalize(agentType),
-		strings.ToUpper(agentType[:1])+agentType[1:],
-		g.answers.ProjectName,
-		roleDesc,
-		skills,
-		g.answers.Language,
-		g.answers.Language,
-	)
-}
-
-// getAgentColor retorna el color para un tipo de agente.
-func (g *Generator) getAgentColor(agentType string) string {
-	colors := map[string]string{
-		"architect":    "cyan",
-		"developer":    "pink",
-		"tester":       "green",
-		"reviewer":     "yellow",
-		"debugger":     "red",
-		"writer":       "blue",
-		"planner":      "purple",
-		"orchestrator": "orange",
-	}
-
-	if color, ok := colors[agentType]; ok {
-		return color
-	}
-	return "gray"
-}
-
-// getAgentToolsList retorna la lista de herramientas para un agente.
-func (g *Generator) getAgentToolsList(agentType string) string {
-	// Herramientas base disponibles
-	baseTools := "Read, Write, Edit, Bash, Glob, Grep"
-
-	// Herramientas adicionales según tipo
-	extraTools := map[string]string{
-		"architect": ", Test, WebSearch",
-		"developer": ", Test",
-		"tester":    ", Test, RunTests",
-		"reviewer":  "",
-		"debugger":  ", Bash, RunTests, Browser",
-		"writer":    "",
-	}
-
-	if extra, ok := extraTools[agentType]; ok {
-		return baseTools + extra
-	}
-	return baseTools
-}
-
-// getAgentSkills retorna las skills para un tipo de agente.
-func (g *Generator) getAgentSkills(agentType string) string {
-	langSkill := strings.ToLower(g.answers.Language)
-
-	skills := map[string]string{
-		"architect": fmt.Sprintf(`- **%s-expert**: Para el dominio del lenguaje y patrones arquitectónicos.
-- **system-architect**: Para el diseño de arquitectura y estructura de módulos.
-- **code-reviewer**: Para validar la calidad del diseño arquitectónico.`,
-			langSkill,
-		),
-		"developer": fmt.Sprintf(`- **%s-expert**: Para el dominio avanzado de %s y optimización.
-- **domain-expert**: Para la creación de entidades robustas y DTOs.
-- **usecase-developer**: Para la implementación de la lógica de negocio.`,
-			langSkill, g.answers.Language,
-		),
-		"tester": fmt.Sprintf(`- **qa-engineer**: Para estrategias de testing y cobertura.
-- **%s-expert**: Para tests específicos del lenguaje.
-- **tdd-champion**: Para metodología TDD.`,
-			langSkill,
-		),
-		"reviewer": fmt.Sprintf(`- **code-reviewer**: Para revisión de calidad y mejores prácticas.
-- **%s-expert**: Para validar convenciones del lenguaje.`,
-			langSkill,
-		),
-		"debugger": fmt.Sprintf(`- **debug-master**: Para análisis y resolución de bugs.
-- **%s-expert**: Para entender problemas específicos del lenguaje.`,
-			langSkill,
-		),
-		"writer": `- **technical-writer**: Para documentación técnica.
-- **code-reviewer**: Para entender el código a documentar.`,
-	}
-
-	if skill, ok := skills[agentType]; ok {
-		return skill
-	}
-
-	return fmt.Sprintf(`- **%s-expert**: Para dominio del lenguaje.
-- **code-reviewer**: Para revisión de código.`,
-		langSkill,
-	)
+	// Retornar string vacío para forzar el uso de IA
+	return ""
 }
 
 // getAgentRoleDescription retorna la descripción del rol para un tipo de agente.
@@ -1410,12 +1264,34 @@ Generate the agent file following the template structure from the guide above. T
 5. Documents "Reglas de Oro" and "Restricciones y Políticas"
 6. Provides an "Invocación de Ejemplo" with expected output
 
+## CRITICAL FRONTMATTER REQUIREMENT
+
+The agent file MUST start with YAML frontmatter that contains **ALL** fields from the "Template Oficial de Agentes" section in the guide above.
+
+**DO NOT omit any field**. The frontmatter MUST include at minimum:
+- name, version, author, description, model, color, type, autonomy_level, requires_human_approval, max_iterations
+
+**Copy the EXACT structure** from the "Template Oficial de Agentes" in the guide, replacing placeholders with actual values.
+
 Remember the core principle from the guide:
 🧠 **Agente = Razonamiento puro** - Sin conocimiento técnico hardcodeado
 📚 **Skills = Conocimiento inyectado** - Convenciones, frameworks, lenguajes
 🛠️ **Tools = Capacidad de acción** - "Darle un ordenador al agente"
 
-CRITICAL: The agent MUST be agnostic to specific technologies. All technical knowledge comes from injected skills, NOT from the agent definition itself.`,
+CRITICAL: The agent MUST be agnostic to specific technologies. All technical knowledge comes from injected skills, NOT from the agent definition itself.
+
+## OUTPUT REQUIREMENT - IMPORTANT
+
+**Your response must be ONLY the markdown file content.**
+
+- Output **ONLY** the agent file content starting with the YAML frontmatter
+- **DO NOT** wrap the output in markdown code blocks
+- **NO** introductory text like "Here is the agent file" or "I'll generate..."
+- **NO** explanatory comments before or after the file content
+- **NO** summary or "## Summary" section at the end
+- **NO** additional notes or explanations
+
+Your output should start directly with --- YAML frontmatter and end with the last line of the file content.`,
 		agentType,
 		g.answers.ProjectName,
 		g.answers.Language,
@@ -1504,7 +1380,20 @@ Remember the core principles from the guide:
 - **Verificación**: Asegurar calidad y no regresiones
 - **Documentación**: Registrar cambios y decisiones
 
-CRITICAL: The command must orchestrate agents properly, defining clear responsibilities and handoff points between agents.`,
+CRITICAL: The command must orchestrate agents properly, defining clear responsibilities and handoff points between agents.
+
+## OUTPUT REQUIREMENT - IMPORTANT
+
+**Your response must be ONLY the markdown file content.**
+
+- Output **ONLY** the command file content starting with the YAML frontmatter
+- **DO NOT** wrap the output in markdown code blocks
+- **NO** introductory text like "Here is the command file" or "I'll generate..."
+- **NO** explanatory comments before or after the file content
+- **NO** summary or "## Summary" section at the end
+- **NO** additional notes or explanations
+
+Your output should start directly with --- YAML frontmatter and end with the last line of the file content.`,
 		commandType,
 		g.answers.ProjectName,
 		g.answers.Language,
@@ -1602,11 +1491,29 @@ When creating this command:
 
 5. **REFERENCE ONLY THE LIST**: Use ONLY agents and skills from "AVAILABLE AGENTS" and "AVAILABLE SKILLS" above.
 
-Example format when creating your command:
+## CRITICAL FRONTMATTER REQUIREMENT
+
+The command file MUST start with YAML frontmatter that contains **ALL** fields from the "Template Oficial de Commands" section in the guide above.
+
+**DO NOT omit any field**. The frontmatter MUST include at minimum:
+- name, version, author, description, usage, type, writes_code, creates_plan, requires_approval, dependencies
+
+**Copy the EXACT structure** from the "Template Oficial de Commands" in the guide, replacing placeholders with actual values.
+
+Example structure (but use ALL fields from the guide's template):
 
 ---
 name: [command-name]
+version: 1.0.0
+author: [team/person]
 description: [your description]
+usage: "[command-name] [args] [optional-context]"
+type: [planning | executable | meta]
+writes_code: false
+creates_plan: [true | false]
+requires_approval: [true | false]
+dependencies: [other-commands, mcps]
+---
 
 # Command: [Command Name]
 
@@ -1625,7 +1532,20 @@ Remember the core principles from the guide:
 - **Verificación**: Asegurar calidad y no regresiones
 - **Documentación**: Registrar cambios y decisiones
 
-**CRITICAL**: You MUST READ the agent descriptions and skill purposes above. Do NOT pick randomly - pick based on WHAT THE AGENT/SKILL DOES according to its description/purpose!`,
+**CRITICAL**: You MUST READ the agent descriptions and skill purposes above. Do NOT pick randomly - pick based on WHAT THE AGENT/SKILL DOES according to its description/purpose!
+
+## OUTPUT REQUIREMENT - IMPORTANT
+
+**Your response must be ONLY the markdown file content.**
+
+- Output **ONLY** the command file content starting with the YAML frontmatter
+- **DO NOT** wrap the output in markdown code blocks
+- **NO** introductory text like "Here is the command file" or "I'll generate..."
+- **NO** explanatory comments before or after the file content
+- **NO** summary or "## Summary" section at the end
+- **NO** additional notes or explanations
+
+Your output should start directly with --- YAML frontmatter and end with the last line of the file content.`,
 		commandType,
 		g.answers.ProjectName,
 		g.answers.Language,
@@ -1748,13 +1668,34 @@ Generate the skill file following the template structure from the guide above. T
 5. Lists "Capabilities" with best practices and patterns
 6. Includes "Output Examples" and "Troubleshooting" sections
 
+## CRITICAL FRONTMATTER REQUIREMENT
+
+The skill file MUST start with YAML frontmatter that contains **ALL** fields from the "Template Oficial de Skills" section in the guide above.
+
+**DO NOT omit any field**. The frontmatter MUST include at minimum:
+- name, description, license, version, author, category, tags
+
+**Copy the EXACT structure** from the "Template Oficial de Skills" in the guide, replacing placeholders with actual values.
+
 Remember the core principles from the guide:
 - **Skills = Conocimiento Inyectado**: Technical expertise externalized from agents
 - **Declarativo, no Imperativo**: Define WHAT and WHY, not HOW
 - **Específico al Dominio**: Focused on particular technologies or patterns
 - **Autocontenido**: Complete and independently usable
 
-CRITICAL: The skill must be domain-specific knowledge that agents can inject, not procedural instructions.`,
+CRITICAL: The skill must be domain-specific knowledge that agents can inject, not procedural instructions.
+
+## OUTPUT REQUIREMENT - IMPORTANT
+
+**Your response must be ONLY the markdown file content.**
+
+- Output **ONLY** the skill file content starting with the YAML frontmatter
+- **NO** introductory text like "Here is the skill file" or "I'll generate..."
+- **NO** explanatory comments before or after the file content
+- **NO** summary or "## Summary" section at the end
+- **NO** additional notes or explanations
+
+Your output should be directly copyable as a .md file without any modifications.`,
 		skillType,
 		skillName,
 		g.answers.ProjectName,
@@ -1807,73 +1748,11 @@ func capitalize(s string) string {
 }
 
 // getEmbeddedSkillTemplate retorna un template markdown incrustado para un skill.
+// Deprecated: Los templates incrustados fueron eliminados para evitar duplicación con las guías.
+// Ahora siempre se usa IA con la guía completa (skill_guide.md).
 func (g *Generator) getEmbeddedSkillTemplate(skillName, skillType string) string {
-	skillDesc := g.getSkillDescription(skillName)
-	skillTitle := g.getSkillTitle(skillName)
-	triggers := g.getSkillTriggers(skillName)
-
-	return fmt.Sprintf(`---
-name: %s
-description: %s
----
-
-# %s
-
-%s
-
-## How It Works
-
-1. The agent identifies the need to use this %s skill.
-2. The specific context and requirements are analyzed.
-3. Appropriate %s patterns and best practices are applied.
-
-## Usage
-
-This skill is automatically activated when working with %s in the %s project.
-
-**Trigger phrases:**
-%s
-
-## Capabilities
-
-- Language-specific best practices for %s
-- Framework-specific patterns and conventions
-- Code optimization techniques
-- Testing strategies
-- Common pitfalls and solutions
-
-## Output Examples
-
-%s
-
-## Present Results to User
-
-When applying this skill, present results in a clear, structured format:
-- Brief summary of what was done
-- Key changes or recommendations
-- Any relevant code snippets or examples
-- Next steps or considerations
-
-## Troubleshooting
-
-**Common issues:**
-- **Incorrect syntax**: Follow %s conventions and best practices
-- **Missing dependencies**: Ensure all required packages are installed
-- **Type errors**: Check type annotations and interfaces
-- **Performance issues**: Review for optimization opportunities`,
-		skillName,
-		skillDesc,
-		skillTitle,
-		skillDesc,
-		skillName,
-		skillName,
-		skillName,
-		g.answers.ProjectName,
-		triggers,
-		skillName,
-		g.getSkillOutputExamples(skillName),
-		g.answers.Language,
-	)
+	// Retornar string vacío para forzar el uso de IA
+	return ""
 }
 
 // getSkillDescription retorna la descripción para un skill.
@@ -1919,119 +1798,12 @@ func (g *Generator) getSkillTitle(skillName string) string {
 	return fmt.Sprintf("%s Skill", capitalize(skillName))
 }
 
-// getSkillTriggers retorna las frases trigger para un skill.
-func (g *Generator) getSkillTriggers(skillName string) string {
-	triggers := map[string]string{
-		"technical-writer": `- "Write documentation for..."
-- "Add comments to..."
-- "Explain how this works..."
-- "Create a guide for..."`,
-		"code-reviewer": `- "Review this code..."
-- "Check for best practices..."
-- "Identify potential issues..."
-- "Suggest improvements..."`,
-		"debug-master": `- "Debug this error..."
-- "Fix this bug..."
-- "Why is this not working..."
-- "Analyze this stack trace..."`,
-	}
-
-	if trigger, ok := triggers[skillName]; ok {
-		return trigger
-	}
-
-	// Triggers genéricos basados en el skill
-	return fmt.Sprintf(`- "Optimize %s..."
-- "Configure %s..."
-- "Fix %s issue..."
-- "Improve %s..."`,
-		skillName, skillName, skillName, skillName,
-	)
-}
-
-// getSkillOutputExamples retorna ejemplos de output para un skill.
-func (g *Generator) getSkillOutputExamples(skillName string) string {
-	examples := map[string]string{
-		"technical-writer": `**Documentation Example:**
-
-%smarkdown
-## Function Name
-
-Brief description of what the function does.
-
-### Parameters
-- param1: Description
-- param2: Description
-
-### Returns
-Description of return value.
-
-### Example
-%s%s
-// Example code
-%s
-`,
-		"code-reviewer": `**Review Summary:**
-- Code follows %s best practices
-- Consider handling edge cases in...
-- Suggestion: Extract this logic into a separate function`,
-		"debug-master": `**Analysis:**
-The issue is caused by...
-**Solution:**
-1. Fix the root cause by...
-2. Add error handling for...
-3. Test with...`,
-	}
-
-	if example, ok := examples[skillName]; ok {
-		if skillName == "technical-writer" {
-			return fmt.Sprintf(example, "```", "```", g.answers.Language, "```", "```")
-		}
-		return fmt.Sprintf(example, g.answers.Language)
-	}
-
-	return fmt.Sprintf(`**Example Output:**
-Applied %s best practices to improve code quality and performance.`, skillName)
-}
-
 // getEmbeddedCommandTemplate retorna un template incrustado para un comando.
+// Deprecated: Los templates incrustados fueron eliminados para evitar duplicación con las guías.
+// Ahora siempre se usa IA con la guía completa (command_guide.md).
 func (g *Generator) getEmbeddedCommandTemplate(commandType string) string {
-	cmdDesc := g.getCommandDescription(commandType)
-	cmdUsage := g.getCommandUsage(commandType)
-	cmdFlow := g.getCommandFlow(commandType)
-
-	return fmt.Sprintf(`---
-name: %s
-description: %s
-usage: %s
----
-
-# Comando: %s
-
-%s
-
-## Flujo de Implementación Orquestado
-
-%s
-
-## Reglas Críticas
-- **Calidad**: Mantener altos estándares de calidad en el código.
-- **Testing**: Asegurar cobertura de pruebas adecuada.
-- **Documentación**: Documentar cambios y decisiones.
-- **Colaboración**: Coordinar con otros agentes cuando sea necesario.
-
----
-
-¿Qué %s deseas realizar en %s?`,
-		commandType,
-		cmdDesc,
-		cmdUsage,
-		capitalize(commandType),
-		cmdDesc,
-		cmdFlow,
-		commandType,
-		g.answers.ProjectName,
-	)
+	// Retornar string vacío para forzar el uso de IA
+	return ""
 }
 
 // getCommandDescription retorna la descripción para un comando.

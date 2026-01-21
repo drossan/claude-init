@@ -5,16 +5,20 @@
 Una **Skill es un paquete modular y auto-contenido** que extiende las capacidades de Claude proporcionando:
 
 - ✅ **Conocimiento especializado** (no razonamiento)
+- ✅ **Lenguajes de programación** (los que requiera el proyecto)
+- ✅ **Plugins, librerías o herramientas** (los que requiera el proyecto)
 - ✅ **Workflows específicos de dominio**
 - ✅ **Integraciones con herramientas**
 - ✅ **Recursos reutilizables** (scripts, referencias, assets)
 
 ### Skills NO son:
+
 - ❌ Agentes (que razonan)
 - ❌ Commands (que orquestan)
 - ❌ Tools (que ejecutan acciones en el sistema)
 
-**Las Skills transforman a Claude de un agente generalista a un especialista equipado con conocimiento procedural que ningún modelo puede poseer completamente.**
+**Las Skills transforman a Claude de un agente generalista a un especialista equipado con conocimiento procedural que
+ningún modelo puede poseer completamente.**
 
 ---
 
@@ -51,16 +55,19 @@ skill-name/
 Las skills usan un **sistema de carga de tres niveles** para gestionar el contexto eficientemente:
 
 ### Nivel 1: Metadata (siempre en contexto)
+
 - `name` + `description` del frontmatter
 - ~100 palabras
 - **Determina cuándo se activa la skill**
 
 ### Nivel 2: SKILL.md body (cuando skill se activa)
+
 - Instrucciones procedurales
 - < 5k palabras recomendadas
 - **Cómo usar la skill**
 
 ### Nivel 3: Recursos (cuando Claude los necesita)
+
 - Scripts, referencias, assets
 - Tamaño ilimitado*
 - **Claude decide cuándo cargarlos**
@@ -76,11 +83,13 @@ Las skills usan un **sistema de carga de tres niveles** para gestionar el contex
 **Propósito**: Código ejecutable para tareas que requieren fiabilidad determinista o se reescriben repetidamente.
 
 **Cuándo incluirlos**:
+
 - ✅ El mismo código se reescribe constantemente
 - ✅ Se necesita fiabilidad determinista (procesamiento de archivos, cálculos)
 - ✅ Operaciones complejas que no deben reinventarse cada vez
 
 **Beneficios**:
+
 - Token-efficient (no ocupan contexto al ejecutarse)
 - Deterministas y testeables
 - Reutilizables sin reescritura
@@ -88,6 +97,7 @@ Las skills usan un **sistema de carga de tres niveles** para gestionar el contex
 **Nota**: Scripts pueden necesitar leerse para parches o ajustes específicos del entorno.
 
 **Ejemplos**:
+
 ```
 scripts/
 ├── rotate_pdf.py          # Rotación de PDFs
@@ -103,16 +113,19 @@ scripts/
 **Propósito**: Documentación y material de referencia que Claude debe consultar mientras trabaja.
 
 **Cuándo incluirlas**:
+
 - ✅ Documentación que Claude debe referenciar durante el trabajo
 - ✅ Información detallada que no cabe en SKILL.md
 - ✅ Conocimiento que cambia con frecuencia
 
 **Beneficios**:
+
 - Mantiene SKILL.md conciso
 - Se cargan solo cuando Claude las necesita
 - Fácilmente actualizables
 
 **Casos de uso**:
+
 - Esquemas de base de datos
 - Documentación de APIs
 - Políticas de la empresa
@@ -120,11 +133,13 @@ scripts/
 - Convenciones de código del proyecto
 
 **Mejores prácticas**:
+
 - Si archivos > 10k palabras, incluir patrones de búsqueda grep en SKILL.md
 - **Evitar duplicación**: información vive en SKILL.md O en referencias, no en ambos
 - Preferir referencias para info detallada; SKILL.md solo para procedimientos core
 
 **Ejemplos**:
+
 ```
 references/
 ├── api_docs.md            # Documentación de API
@@ -141,15 +156,18 @@ references/
 **Propósito**: Archivos que NO se cargan en contexto, sino que se usan en el output que Claude produce.
 
 **Cuándo incluirlos**:
+
 - ✅ La skill necesita archivos que estarán en el output final
 - ✅ Templates, boilerplates, recursos visuales
 
 **Beneficios**:
+
 - Separa recursos de output de documentación
 - Claude puede usar archivos sin cargarlos en contexto
 - Acelera desarrollo al evitar recrear boilerplate
 
 **Casos de uso**:
+
 - Templates (HTML, React, documentos)
 - Imágenes (logos, iconos)
 - Boilerplate de código
@@ -157,6 +175,7 @@ references/
 - Documentos de muestra
 
 **Ejemplos**:
+
 ```
 assets/
 ├── templates/
@@ -183,11 +202,13 @@ assets/
 **Saltar este paso solo si**: Los patrones de uso ya son muy claros.
 
 **Preguntas a responder**:
+
 1. ¿Qué funcionalidad debe soportar la skill?
 2. ¿Puedes dar ejemplos de cómo se usaría?
 3. ¿Qué diría un usuario que debería activar esta skill?
 
 **Ejemplo - skill `image-editor`**:
+
 ```
 Q: ¿Qué funcionalidad debería soportar?
 A: Edición, rotación, redimensionado, optimización
@@ -212,10 +233,12 @@ A: Cualquier petición de manipulación de imágenes
 **Objetivo**: Convertir ejemplos concretos en recursos de la skill.
 
 **Proceso para cada ejemplo**:
+
 1. Considerar cómo ejecutar el ejemplo desde cero
 2. Identificar qué scripts, referencias o assets serían útiles al repetir estos workflows
 
 **Ejemplo - skill `pdf-editor`**:
+
 ```
 Query: "Ayúdame a rotar este PDF"
 
@@ -230,6 +253,7 @@ Recursos a incluir:
 ```
 
 **Ejemplo - skill `frontend-webapp-builder`**:
+
 ```
 Queries: 
 - "Construye una todo app"
@@ -246,6 +270,7 @@ Recursos a incluir:
 ```
 
 **Ejemplo - skill `bigquery`**:
+
 ```
 Query: "¿Cuántos usuarios se logearon hoy?"
 
@@ -278,6 +303,7 @@ scripts/init_skill.py pdf-editor --path ./skills/
 ```
 
 **El script genera**:
+
 ```
 pdf-editor/
 ├── SKILL.md              # Template con frontmatter y TODOs
@@ -290,6 +316,7 @@ pdf-editor/
 ```
 
 **Después de inicialización**:
+
 - Personalizar o eliminar archivos de ejemplo
 - Completar TODOs en SKILL.md
 
@@ -302,6 +329,7 @@ pdf-editor/
 #### 4.1 Implementar Recursos Reutilizables
 
 **Orden recomendado**:
+
 1. Crear scripts en `scripts/`
 2. Documentar en `references/`
 3. Agregar assets en `assets/`
@@ -312,26 +340,31 @@ pdf-editor/
 #### 4.2 Actualizar SKILL.md
 
 **Estilo de escritura**:
+
 - ✅ **Forma imperativa/infinitiva** (verb-first)
 - ✅ Lenguaje objetivo e instructivo
 - ❌ NO usar segunda persona ("tú debes")
 - ❌ NO usar primera persona ("yo haré")
 
 **Ejemplo correcto**:
+
 ```markdown
 Para rotar un PDF:
+
 1. Ejecutar `scripts/rotate_pdf.py` con el archivo de entrada
 2. Especificar el ángulo de rotación (90, 180, 270)
 3. Validar que el output se generó correctamente
 ```
 
 **Ejemplo incorrecto**:
+
 ```markdown
 Debes rotar el PDF usando el script.
 Tú especificarás el ángulo.
 ```
 
 **Preguntas a responder en SKILL.md**:
+
 1. ¿Cuál es el propósito de la skill? (2-3 frases)
 2. ¿Cuándo debe usarse la skill?
 3. ¿Cómo debe Claude usar la skill en la práctica?
@@ -354,7 +387,9 @@ scripts/package_skill.py <path/to/skill-folder> ./dist
 **El script realiza**:
 
 #### 5.1 Validación Automática
+
 Verifica:
+
 - ✅ Formato de frontmatter YAML
 - ✅ Campos requeridos (name, description)
 - ✅ Convenciones de nomenclatura
@@ -364,12 +399,15 @@ Verifica:
 - ✅ Referencias a recursos en SKILL.md
 
 #### 5.2 Empaquetado (si validación pasa)
+
 Crea:
+
 - `{skill-name}.zip` con todos los archivos
 - Mantiene estructura de directorios
 - Listo para distribución
 
 **Si validación falla**:
+
 - Script reporta errores
 - No crea package
 - Corregir errores y re-ejecutar
@@ -379,6 +417,7 @@ Crea:
 ### Paso 6: Iterar
 
 **Workflow de iteración**:
+
 1. Usar la skill en tareas reales
 2. Notar dificultades o ineficiencias
 3. Identificar cómo mejorar SKILL.md o recursos
@@ -404,29 +443,32 @@ tags: [tag1, tag2, tag3]
 
 # {Skill Name}
 
-{Breve descripción del propósito de la skill en 2-3 frases. 
+{Breve descripción del propósito de la skill en 2-3 frases.
 Explicar qué problema resuelve y qué capacidades añade a Claude.}
 
 ## Cuándo Usar Esta Skill
 
 Esta skill debe usarse cuando:
+
 - {Escenario 1 específico}
 - {Escenario 2 específico}
 - {Escenario 3 específico}
 
 Triggers comunes:
+
 - "{ejemplo de query del usuario 1}"
 - "{ejemplo de query del usuario 2}"
 - "{ejemplo de query del usuario 3}"
 
 ## Workflow Principal
 
-{Instrucciones paso a paso en modo IMPERATIVO. 
+{Instrucciones paso a paso en modo IMPERATIVO.
 Enfocarse en el proceso lógico que debe seguir Claude.}
 
 ### 1. Análisis Inicial
 
 Antes de proceder:
+
 1. Identificar {variable/requisito específico}
 2. Verificar que {condición necesaria} está presente
 3. Determinar si {decisión clave}
@@ -434,6 +476,7 @@ Antes de proceder:
 ### 2. Ejecución
 
 Para completar la tarea:
+
 1. Ejecutar `scripts/{script-name}` para {propósito}
 2. Consultar `references/{doc-name}` si se necesita {tipo de info}
 3. Aplicar template de `assets/{template-name}` como base
@@ -442,6 +485,7 @@ Para completar la tarea:
 ### 3. Validación
 
 Verificar que:
+
 - [ ] {Criterio de validación 1}
 - [ ] {Criterio de validación 2}
 - [ ] {Criterio de validación 3}
@@ -449,6 +493,7 @@ Verificar que:
 ### 4. Output
 
 Presentar resultados:
+
 - Formato: {especificar formato esperado}
 - Incluir: {qué debe contener el output}
 - Omitir: {qué NO debe incluirse}
@@ -460,20 +505,24 @@ Presentar resultados:
 Scripts ejecutables disponibles:
 
 #### `scripts/{script-name}.{ext}`
+
 **Propósito**: {Qué hace el script}
 
 **Uso**:
+
 ```bash
 {lenguaje} scripts/{script-name}.{ext} [argumentos]
 ```
 
 **Parámetros**:
+
 - `arg1`: {Descripción del argumento}
 - `arg2`: {Descripción del argumento}
 
 **Output**: {Qué retorna/genera}
 
 **Ejemplo**:
+
 ```bash
 python scripts/rotate_pdf.py input.pdf --angle 90 --output rotated.pdf
 ```
@@ -485,6 +534,7 @@ python scripts/rotate_pdf.py input.pdf --angle 90 --output rotated.pdf
 Documentación técnica que cargar según necesidad:
 
 #### `references/{doc-name}.md`
+
 **Contenido**: {Tipo de información que contiene}
 
 **Cuándo consultar**: {Bajo qué circunstancias debe leerse}
@@ -492,6 +542,7 @@ Documentación técnica que cargar según necesidad:
 **Estructura**: {Breve descripción de cómo está organizado}
 
 **Búsqueda rápida**: Para archivos grandes, usar patrones grep:
+
 ```bash
 grep -i "{patrón relevante}" references/{doc-name}.md
 ```
@@ -503,6 +554,7 @@ grep -i "{patrón relevante}" references/{doc-name}.md
 Archivos para usar en output final:
 
 #### `assets/{asset-name}`
+
 **Tipo**: {Template / Image / Boilerplate / etc.}
 
 **Uso**: {Cómo debe usarse este asset}
@@ -517,11 +569,13 @@ Archivos para usar en output final:
 > "{query exacto del usuario}"
 
 **Proceso**:
+
 1. {Paso que Claude debe seguir}
 2. {Paso que Claude debe seguir}
 3. {Paso que Claude debe seguir}
 
 **Output esperado**:
+
 ```
 {Ejemplo de output que Claude debería generar}
 ```
@@ -534,10 +588,12 @@ Archivos para usar en output final:
 > "{query exacto del usuario}"
 
 **Proceso**:
+
 1. {Paso específico}
 2. {Paso específico}
 
 **Output esperado**:
+
 ```
 {Ejemplo de output}
 ```
@@ -552,6 +608,7 @@ Al completar la tarea:
 4. **Adjuntar archivos**: {Si se generaron archivos, cómo presentarlos}
 
 **Ejemplo de resumen**:
+
 ```
 Rotado PDF correctamente 90° en sentido horario.
 - Archivo de entrada: document.pdf (1.2 MB)
@@ -562,11 +619,13 @@ Rotado PDF correctamente 90° en sentido horario.
 ## Troubleshooting
 
 ### Problema: {Error común 1}
+
 **Síntoma**: {Cómo se manifiesta}
 
 **Causa**: {Por qué ocurre}
 
 **Solución**:
+
 ```bash
 {Comando o acción para resolverlo}
 ```
@@ -574,20 +633,24 @@ Rotado PDF correctamente 90° en sentido horario.
 ---
 
 ### Problema: {Error común 2}
+
 **Síntoma**: {Cómo se manifiesta}
 
 **Causa**: {Por qué ocurre}
 
 **Solución**:
+
 1. {Paso de resolución}
 2. {Paso de resolución}
 
 ---
 
 ### Problema: Referencias muy grandes
+
 **Síntoma**: Archivo de referencia > 10k palabras
 
 **Solución**: Usar grep para buscar secciones específicas:
+
 ```bash
 grep -A 10 "{término clave}" references/{archivo}.md
 ```
@@ -595,9 +658,11 @@ grep -A 10 "{término clave}" references/{archivo}.md
 ---
 
 ### Problema: Permisos de ejecución
+
 **Síntoma**: Error "Permission denied" al ejecutar script
 
 **Solución**:
+
 ```bash
 chmod +x scripts/*.sh
 chmod +x scripts/*.py
@@ -606,14 +671,17 @@ chmod +x scripts/*.py
 ## Consideraciones Especiales
 
 ### Rendimiento
+
 - {Nota sobre rendimiento si aplica}
 - {Limitaciones conocidas}
 
 ### Seguridad
+
 - {Consideraciones de seguridad}
 - {Datos sensibles que no deben exponerse}
 
 ### Compatibilidad
+
 - {Requisitos de versiones}
 - {Dependencias externas}
 
@@ -622,6 +690,7 @@ chmod +x scripts/*.py
 - [ ] {Feature o mejora planificada 1}
 - [ ] {Feature o mejora planificada 2}
 - [ ] {Feature o mejora planificada 3}
+
 ```
 
 ---
@@ -658,16 +727,19 @@ description: Esta skill debe usarse cuando el usuario necesite editar, rotar, o 
 ```
 
 ❌ **Mala description**:
+
 ```yaml
 description: Use esta skill para PDFs.  # Demasiado corta, no específica
 ```
 
 ❌ **Mala description**:
+
 ```yaml
 description: Esta skill permite a los usuarios trabajar con archivos PDF realizando diversas operaciones incluyendo pero no limitadas a...  # Demasiado verbosa, no clara
 ```
 
 **Elementos clave en description**:
+
 1. **Cuándo usarse** ("cuando el usuario necesite...")
 2. **Triggers específicos** ("peticiones como...")
 3. **Alcance claro** (qué incluye y qué no)
@@ -681,12 +753,14 @@ description: Esta skill permite a los usuarios trabajar con archivos PDF realiza
 **Regla**: Información vive en SKILL.md **O** en referencias, **nunca en ambos**.
 
 **Preferir referencias para**:
+
 - Documentación detallada (> 500 palabras)
 - Info que cambia frecuentemente
 - Esquemas complejos
 - Especificaciones técnicas exhaustivas
 
 **Mantener en SKILL.md solo**:
+
 - Instrucciones procedurales core
 - Guía de workflow
 - Referencias a dónde encontrar info detallada
@@ -696,11 +770,13 @@ description: Esta skill permite a los usuarios trabajar con archivos PDF realiza
 ### 8.2 Granularidad de Scripts
 
 **Crear script cuando**:
+
 - ✅ Mismo código se reescribe 3+ veces
 - ✅ Necesita ser determinista (procesamiento de archivos)
 - ✅ Lógica compleja que no debe reinventarse
 
 **NO crear script para**:
+
 - ❌ Tareas simples que Claude hace bien (ej: formatear JSON)
 - ❌ Lógica que varía mucho caso por caso
 - ❌ Una sola vez / uso único
@@ -710,20 +786,24 @@ description: Esta skill permite a los usuarios trabajar con archivos PDF realiza
 ### 8.3 Organización de Referencias
 
 **Para archivos grandes** (> 10k palabras):
+
 - Incluir tabla de contenidos en SKILL.md
 - Proporcionar patrones de búsqueda grep
 - Dividir en múltiples archivos por tema
 
 **Ejemplo en SKILL.md**:
+
 ```markdown
 ### `references/api_documentation.md` (grande - 25k palabras)
 
 **Estructura**:
+
 - Sección 1: Authentication (líneas 1-500)
 - Sección 2: User Endpoints (líneas 501-1200)
 - Sección 3: Data Endpoints (líneas 1201-2000)
 
 **Búsqueda rápida**:
+
 ```bash
 # Buscar endpoint específico
 grep -i "POST /api/users" references/api_documentation.md
@@ -731,6 +811,7 @@ grep -i "POST /api/users" references/api_documentation.md
 # Buscar info de autenticación
 grep -A 20 "## Authentication" references/api_documentation.md
 ```
+
 ```
 
 ---
@@ -763,6 +844,7 @@ description: Esta skill hace desarrollo completo de software, testing, deploymen
 **Por qué es malo**: Demasiado genérica, no se activa apropiadamente
 
 **Solución**: Dividir en skills específicas:
+
 - `backend-api-developer`
 - `frontend-component-builder`
 - `test-automation`
@@ -771,11 +853,14 @@ description: Esta skill hace desarrollo completo de software, testing, deploymen
 ---
 
 ### ❌ Skill Sin Workflow Claro
+
 **Problema**: Solo lista recursos sin explicar cómo usarlos
 
 **Ejemplo**:
+
 ```markdown
 ## Recursos
+
 - scripts/script1.py
 - scripts/script2.sh
 - references/doc.md
@@ -784,27 +869,34 @@ description: Esta skill hace desarrollo completo de software, testing, deploymen
 **Por qué es malo**: Claude no sabe cuándo/cómo usar cada recurso
 
 **Solución**: Workflow explícito:
+
 ```markdown
 ## Workflow
 
 ### 1. Análisis
+
 Ejecutar `scripts/analyze.py` para evaluar el input
 
 ### 2. Procesamiento
+
 Según el tipo identificado:
+
 - Si es PDF → usar `scripts/process_pdf.py`
 - Si es imagen → usar `scripts/process_image.py`
 
 ### 3. Validación
+
 Consultar `references/validation_rules.md` para criterios
 ```
 
 ---
 
 ### ❌ Descripciones Vagas
+
 **Problema**: Triggers no específicos
 
 **Ejemplo**:
+
 ```yaml
 description: Para trabajar con archivos.
 ```
@@ -812,6 +904,7 @@ description: Para trabajar con archivos.
 **Por qué es malo**: No queda claro cuándo activarse
 
 **Solución**:
+
 ```yaml
 description: Esta skill debe usarse cuando el usuario necesite convertir, comprimir, o validar archivos PDF. Se activa con peticiones como "convierte este Word a PDF", "reduce el tamaño de este PDF", o "verifica que este PDF es válido".
 ```
@@ -819,18 +912,24 @@ description: Esta skill debe usarse cuando el usuario necesite convertir, compri
 ---
 
 ### ❌ Duplicación de Contenido
+
 **Problema**: Misma info en SKILL.md y en references/
 
 **Ejemplo**:
+
 ```markdown
 # SKILL.md
+
 ## API Endpoints
+
 POST /api/users - Crear usuario
 GET /api/users/:id - Obtener usuario
 ...
 
 # references/api_docs.md
+
 ## API Endpoints
+
 POST /api/users - Crear usuario
 GET /api/users/:id - Obtener usuario
 ...
@@ -839,48 +938,62 @@ GET /api/users/:id - Obtener usuario
 **Por qué es malo**: Desperdicia tokens, info desincronizada
 
 **Solución**:
+
 ```markdown
 # SKILL.md
+
 ## Workflow
+
 Para consultar endpoints de API, referirse a `references/api_docs.md` sección "Endpoints".
 
 # references/api_docs.md
+
 ## Endpoints
+
 [Documentación completa aquí]
 ```
 
 ---
 
 ### ❌ Scripts Sin Documentación
+
 **Problema**: Scripts sin explicar parámetros o uso
 
 **Ejemplo**:
+
 ```markdown
 ### Scripts
+
 - `scripts/process.py`
 ```
 
 **Por qué es malo**: Claude no sabe cómo invocar el script
 
 **Solución**:
+
 ```markdown
 ### `scripts/process.py`
+
 **Propósito**: Procesar archivos CSV y generar reporte JSON
 
 **Uso**:
+
 ```bash
 python scripts/process.py <input.csv> [--output report.json] [--verbose]
 ```
 
 **Parámetros**:
+
 - `input.csv`: Archivo CSV de entrada (obligatorio)
 - `--output`: Nombre del archivo JSON de salida (opcional, default: output.json)
 - `--verbose`: Modo verbose para debugging (opcional)
 
 **Ejemplo**:
+
 ```bash
 python scripts/process.py data/sales.csv --output reports/sales_summary.json
 ```
+
 ```
 
 ---
@@ -1032,21 +1145,25 @@ python scripts/rotate_pdf.py <input.pdf> --angle <90|180|270> --output <output.p
 ```
 
 #### Combinación
+
 ```bash
 python scripts/merge_pdfs.py <pdf1> <pdf2> [pdf3 ...] --output <merged.pdf>
 ```
 
 #### Compresión
+
 ```bash
 python scripts/compress_pdf.py <input.pdf> --quality <low|medium|high> --output <compressed.pdf>
 ```
 
 #### División
+
 ```bash
 python scripts/split_pdf.py <input.pdf> --output-dir <output_directory>
 ```
 
 #### Extracción
+
 ```bash
 python scripts/extract_pages.py <input.pdf> --pages <start-end> --output <extracted.pdf>
 ```
@@ -1054,6 +1171,7 @@ python scripts/extract_pages.py <input.pdf> --pages <start-end> --output <extrac
 ### 3. Validación
 
 Verificar que:
+
 - [ ] El archivo de salida se generó correctamente
 - [ ] El tamaño del archivo es razonable (no aumentó inesperadamente)
 - [ ] El PDF resultante es válido (puede abrirse sin errores)
@@ -1062,6 +1180,7 @@ Verificar que:
 ### 4. Output
 
 Presentar resultados:
+
 - Formato: Resumen textual + estadísticas de la operación
 - Incluir: Nombre del archivo de salida, tamaño, número de páginas
 - Omitir: Detalles técnicos internos del procesamiento
@@ -1071,14 +1190,17 @@ Presentar resultados:
 ### Scripts (`scripts/`)
 
 #### `scripts/rotate_pdf.py`
+
 **Propósito**: Rotar todas las páginas de un PDF en el ángulo especificado
 
 **Uso**:
+
 ```bash
 python scripts/rotate_pdf.py <input.pdf> --angle <angle> --output <output.pdf>
 ```
 
 **Parámetros**:
+
 - `input.pdf`: Archivo PDF de entrada (obligatorio)
 - `--angle`: Ángulo de rotación - 90, 180, o 270 grados (obligatorio)
 - `--output`: Nombre del archivo de salida (opcional, default: input_rotated.pdf)
@@ -1086,6 +1208,7 @@ python scripts/rotate_pdf.py <input.pdf> --angle <angle> --output <output.pdf>
 **Output**: PDF rotado en la ubicación especificada
 
 **Ejemplo**:
+
 ```bash
 python scripts/rotate_pdf.py document.pdf --angle 90 --output document_rotated.pdf
 ```
@@ -1093,20 +1216,24 @@ python scripts/rotate_pdf.py document.pdf --angle 90 --output document_rotated.p
 ---
 
 #### `scripts/merge_pdfs.py`
+
 **Propósito**: Combinar múltiples archivos PDF en uno solo
 
 **Uso**:
+
 ```bash
 python scripts/merge_pdfs.py <pdf1> <pdf2> [pdf3 ...] --output <merged.pdf>
 ```
 
 **Parámetros**:
+
 - `pdf1, pdf2, ...`: Archivos PDF a combinar en orden (mínimo 2)
 - `--output`: Nombre del archivo combinado (opcional, default: merged.pdf)
 
 **Output**: PDF único con todos los documentos combinados
 
 **Ejemplo**:
+
 ```bash
 python scripts/merge_pdfs.py intro.pdf content.pdf appendix.pdf --output complete_document.pdf
 ```
@@ -1114,14 +1241,17 @@ python scripts/merge_pdfs.py intro.pdf content.pdf appendix.pdf --output complet
 ---
 
 #### `scripts/compress_pdf.py`
+
 **Propósito**: Reducir el tamaño de un PDF optimizando imágenes y eliminando metadata innecesaria
 
 **Uso**:
+
 ```bash
 python scripts/compress_pdf.py <input.pdf> --quality <level> --output <compressed.pdf>
 ```
 
 **Parámetros**:
+
 - `input.pdf`: Archivo PDF a comprimir (obligatorio)
 - `--quality`: Nivel de compresión - low/medium/high (opcional, default: medium)
     - `low`: Máxima compresión, menor calidad
@@ -1132,6 +1262,7 @@ python scripts/compress_pdf.py <input.pdf> --quality <level> --output <compresse
 **Output**: PDF comprimido
 
 **Ejemplo**:
+
 ```bash
 python scripts/compress_pdf.py large_document.pdf --quality medium --output optimized.pdf
 ```
@@ -1139,20 +1270,24 @@ python scripts/compress_pdf.py large_document.pdf --quality medium --output opti
 ---
 
 #### `scripts/split_pdf.py`
+
 **Propósito**: Dividir un PDF en múltiples archivos, uno por página
 
 **Uso**:
+
 ```bash
 python scripts/split_pdf.py <input.pdf> --output-dir <directory>
 ```
 
 **Parámetros**:
+
 - `input.pdf`: Archivo PDF a dividir (obligatorio)
 - `--output-dir`: Directorio donde guardar las páginas (opcional, default: output/)
 
 **Output**: Múltiples archivos PDF (page_1.pdf, page_2.pdf, etc.)
 
 **Ejemplo**:
+
 ```bash
 python scripts/split_pdf.py document.pdf --output-dir ./pages/
 ```
@@ -1160,14 +1295,17 @@ python scripts/split_pdf.py document.pdf --output-dir ./pages/
 ---
 
 #### `scripts/extract_pages.py`
+
 **Propósito**: Extraer un rango específico de páginas de un PDF
 
 **Uso**:
+
 ```bash
 python scripts/extract_pages.py <input.pdf> --pages <start-end> --output <extracted.pdf>
 ```
 
 **Parámetros**:
+
 - `input.pdf`: Archivo PDF fuente (obligatorio)
 - `--pages`: Rango de páginas a extraer, formato: start-end (obligatorio)
 - `--output`: Nombre del archivo con páginas extraídas (opcional, default: extracted.pdf)
@@ -1175,6 +1313,7 @@ python scripts/extract_pages.py <input.pdf> --pages <start-end> --output <extrac
 **Output**: PDF con solo las páginas especificadas
 
 **Ejemplo**:
+
 ```bash
 python scripts/extract_pages.py report.pdf --pages 5-10 --output summary.pdf
 ```
@@ -1184,11 +1323,13 @@ python scripts/extract_pages.py report.pdf --pages 5-10 --output summary.pdf
 ### Referencias (`references/`)
 
 #### `references/pdf_standards.md`
+
 **Contenido**: Especificaciones técnicas del formato PDF, versiones soportadas, y limitaciones conocidas
 
 **Cuándo consultar**: Al encontrar PDFs con características especiales (encriptación, formularios, anotaciones)
 
 **Estructura**:
+
 - Versiones de PDF (1.4 - 2.0)
 - Características soportadas/no soportadas
 - Manejo de PDFs encriptados
@@ -1197,11 +1338,13 @@ python scripts/extract_pages.py report.pdf --pages 5-10 --output summary.pdf
 ---
 
 #### `references/troubleshooting_guide.md`
+
 **Contenido**: Guía detallada de resolución de problemas comunes con PDFs
 
 **Cuándo consultar**: Cuando un script falla o produce resultados inesperados
 
 **Búsqueda rápida**:
+
 ```bash
 # Buscar error específico
 grep -i "encryption error" references/troubleshooting_guide.md
@@ -1214,7 +1357,8 @@ grep -A 10 "## Compression Issues" references/troubleshooting_guide.md
 
 ### Assets (`assets/`)
 
-No se incluyen assets en esta skill ya que todas las operaciones trabajan directamente con PDFs del usuario sin necesidad de templates.
+No se incluyen assets en esta skill ya que todas las operaciones trabajan directamente con PDFs del usuario sin
+necesidad de templates.
 
 ## Ejemplos de Uso
 
@@ -1224,12 +1368,14 @@ No se incluyen assets en esta skill ya que todas las operaciones trabajan direct
 > "Este PDF está girado 90 grados, rótaloadecuadamente"
 
 **Proceso**:
+
 1. Identificar que necesita rotación
 2. Determinar ángulo correcto (probablemente 270° para corregir rotación de 90°)
 3. Ejecutar: `python scripts/rotate_pdf.py scanned.pdf --angle 270 --output scanned_corrected.pdf`
 4. Validar que el PDF resultante está correctamente orientado
 
 **Output esperado**:
+
 ```
 PDF rotado correctamente 270° en sentido horario.
 - Archivo de entrada: scanned.pdf (2.4 MB, 15 páginas)
@@ -1246,12 +1392,14 @@ PDF rotado correctamente 270° en sentido horario.
 > "Combina mi CV, carta de presentación y referencias en un solo PDF"
 
 **Proceso**:
+
 1. Identificar los tres archivos: cv.pdf, cover_letter.pdf, references.pdf
 2. Determinar orden apropiado (CV primero, carta segundo, referencias último)
 3. Ejecutar: `python scripts/merge_pdfs.py cv.pdf cover_letter.pdf references.pdf --output application_complete.pdf`
 4. Validar que todas las páginas se combinaron correctamente
 
 **Output esperado**:
+
 ```
 PDFs combinados exitosamente en orden secuencial.
 - Archivos combinados: 3 (cv.pdf, cover_letter.pdf, references.pdf)
@@ -1269,12 +1417,14 @@ PDFs combinados exitosamente en orden secuencial.
 > "Este PDF es muy pesado para enviar por email, comprímelo"
 
 **Proceso**:
+
 1. Verificar tamaño del archivo (ej: 15 MB)
 2. Determinar nivel de compresión (medium por defecto, o preguntar al usuario)
 3. Ejecutar: `python scripts/compress_pdf.py large_report.pdf --quality medium --output report_compressed.pdf`
 4. Validar reducción de tamaño y calidad aceptable
 
 **Output esperado**:
+
 ```
 PDF comprimido exitosamente con calidad media.
 - Archivo original: large_report.pdf (15.2 MB, 45 páginas)
@@ -1299,6 +1449,7 @@ Al completar cualquier operación de PDF:
 4. **Adjuntar archivos**: Indicar ubicación del archivo generado
 
 **Ejemplo de resumen completo**:
+
 ```
 Operación: Rotación de PDF
 - Entrada: document.pdf (1.2 MB, 8 páginas)
@@ -1311,11 +1462,13 @@ Operación: Rotación de PDF
 ## Troubleshooting
 
 ### Problema: Error de permisos al ejecutar scripts
+
 **Síntoma**: `Permission denied` al ejecutar cualquier script Python
 
 **Causa**: Scripts no tienen permisos de ejecución
 
 **Solución**:
+
 ```bash
 chmod +x scripts/*.py
 ```
@@ -1323,11 +1476,13 @@ chmod +x scripts/*.py
 ---
 
 ### Problema: PDF encriptado o protegido
+
 **Síntoma**: Error "PDF is encrypted" o "Password required"
 
 **Causa**: El PDF tiene protección con contraseña
 
 **Solución**:
+
 1. Solicitar contraseña al usuario
 2. Consultar `references/pdf_standards.md` sección "Encrypted PDFs"
 3. Si no hay contraseña disponible, informar al usuario que no se puede procesar
@@ -1335,11 +1490,13 @@ chmod +x scripts/*.py
 ---
 
 ### Problema: Compresión no reduce tamaño significativamente
+
 **Síntoma**: PDF comprimido tiene casi el mismo tamaño que el original
 
 **Causa**: El PDF original ya está optimizado o contiene mayormente texto (no imágenes)
 
 **Solución**:
+
 1. Informar al usuario que el PDF ya está optimizado
 2. Explicar que PDFs con texto plano no comprimen mucho
 3. Sugerir alternativas si el tamaño sigue siendo problema (dividir, extraer páginas)
@@ -1347,11 +1504,13 @@ chmod +x scripts/*.py
 ---
 
 ### Problema: Script falla con PDFs muy grandes
+
 **Síntoma**: Error de memoria o timeout
 
 **Causa**: PDF demasiado grande (> 100 MB o > 500 páginas)
 
 **Solución**:
+
 1. Dividir el PDF en chunks más pequeños
 2. Procesar cada chunk individualmente
 3. Combinar resultados al final
@@ -1360,13 +1519,16 @@ chmod +x scripts/*.py
 ---
 
 ### Problema: Calidad visual degradada después de compresión
+
 **Síntoma**: Texto borroso o imágenes pixeladas en PDF comprimido
 
 **Causa**: Nivel de compresión demasiado agresivo
 
 **Solución**:
+
 1. Re-comprimir con nivel `high` en vez de `medium` o `low`
 2. Explicar trade-off entre tamaño y calidad al usuario
+
 ```bash
 python scripts/compress_pdf.py input.pdf --quality high --output better_quality.pdf
 ```
@@ -1374,18 +1536,21 @@ python scripts/compress_pdf.py input.pdf --quality high --output better_quality.
 ## Consideraciones Especiales
 
 ### Rendimiento
+
 - PDFs < 5 MB: procesamiento instantáneo (< 1s)
 - PDFs 5-20 MB: procesamiento rápido (1-3s)
 - PDFs > 20 MB: puede tomar 5-10s según operación
 - Combinación de muchos archivos: tiempo proporcional al número de archivos
 
 ### Seguridad
+
 - Los scripts NO almacenan ni transmiten contenido de PDFs
 - Archivos temporales se eliminan automáticamente después del procesamiento
 - No se accede a metadatos sensibles sin autorización explícita
 - PDFs encriptados requieren contraseña proporcionada por el usuario
 
 ### Compatibilidad
+
 - Requisitos: Python 3.8+
 - Dependencias: PyPDF2, pikepdf (instaladas automáticamente)
 - Formatos soportados: PDF 1.4 - 2.0
@@ -1398,6 +1563,7 @@ python scripts/compress_pdf.py input.pdf --quality high --output better_quality.
 - [ ] Conversión PDF a imágenes (PNG/JPG)
 - [ ] Soporte para firmas digitales
 - [ ] Optimización de PDFs para web (linearization)
+
 ```
 
 ---
@@ -1425,11 +1591,13 @@ scripts/init_skill.py <skill-name> --path <output-directory>
 ```
 
 ### Empaquetar Skill
+
 ```bash
 scripts/package_skill.py <path/to/skill-folder> [output-dir]
 ```
 
 ### Validar Skill (pre-empaquetado)
+
 ```bash
 scripts/validate_skill.py <path/to/skill-folder>
 ```
@@ -1439,16 +1607,19 @@ scripts/validate_skill.py <path/to/skill-folder>
 ## 15. Recursos Adicionales
 
 ### Plantillas
+
 - `templates/basic-skill.md` - Skill básica sin recursos
 - `templates/script-heavy-skill.md` - Skill con múltiples scripts
 - `templates/documentation-skill.md` - Skill orientada a referencias
 
 ### Ejemplos
+
 - `examples/pdf-editor/` - Manipulación de archivos
 - `examples/bigquery-analyst/` - Análisis de datos
 - `examples/frontend-builder/` - Generación de código
 
 ### Documentación
+
 - `docs/skill-best-practices.md` - Mejores prácticas detalladas
 - `docs/metadata-guide.md` - Guía de frontmatter efectivo
 - `docs/progressive-disclosure.md` - Cómo optimizar carga de contexto
