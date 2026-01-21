@@ -19,12 +19,12 @@ The configuration is stored in ~/.config/claude-init/config.yaml (macOS/Linux)
 or %APPDATA%\claude-init\config.yaml (Windows).
 
 Available providers:
-- cli: Claude CLI (free with Claude Code PRO)
-- openai: OpenAI API (requires API key)
-- gemini: Google Gemini API (free tier available)
-- groq: Groq API (free tier available)
+- cli: Claude CLI (gratis con Claude Code PRO) - Opción por defecto
+- openai: OpenAI API (Requiere API key)
+- gemini: Google Gemini API (Requiere API key)
+- Groq API (Requiere API key)
 - claude-api: Anthropic Claude API (requires API key)
-- zai: Z.AI API (requires API key)`,
+- zai: Z.AI API (Requiere API key)`,
 	RunE: runConfig,
 }
 
@@ -103,6 +103,10 @@ func runConfig(cmd *cobra.Command, args []string) error {
 	if provider != "cli" {
 		fmt.Println("  You can now use claude-init commands with this provider")
 	}
+
+	// Mostrar advertencia para proveedores con free tier limitado
+	showFreeTierWarning(provider)
+
 	return nil
 }
 
@@ -111,14 +115,15 @@ func askProvider() (string, error) {
 	prompt := &survey.Select{
 		Message: "Select AI provider to configure:",
 		Options: []string{
-			"Claude CLI (Free with Claude Code PRO)",
-			"OpenAI API",
-			"Google Gemini API (Free tier available)",
-			"Groq API (Free tier available)",
+			"Claude CLI (gratis con Claude Code PRO) - Opción por defecto",
+			"OpenAI API (Requiere API key)",
+			"Google Gemini API (Requiere API key) - ⚠️ Free tier NO válido para este CLI",
+			"Groq API (Requiere API key) - ⚠️ Free tier NO válido para este CLI",
 			// "Claude API (Anthropic API)",
 			// "Z.AI API",
 		},
-		Default: "Claude CLI (Free with Claude Code PRO)",
+		Default: "Claude CLI (gratis con Claude Code PRO) - Opción por defecto",
+		Help:    "Claude CLI usa tu suscripción PRO. Gemini y Groq free tiers have very low limits (~15-50 requests/day).",
 	}
 
 	if err := survey.AskOne(prompt, &provider); err != nil {
@@ -127,13 +132,13 @@ func askProvider() (string, error) {
 
 	// Mapear la selección al valor interno
 	switch provider {
-	case "Claude CLI (Free with Claude Code PRO)":
+	case "Claude CLI (gratis con Claude Code PRO) - Opción por defecto":
 		return "cli", nil
-	case "OpenAI API":
+	case "OpenAI API (Requiere API key)":
 		return "openai", nil
-	case "Google Gemini API (Free tier available)":
+	case "Google Gemini API (Requiere API key) - ⚠️ Free tier NO válido para este CLI":
 		return "gemini", nil
-	case "Groq API (Free tier available)":
+	case "Groq API (Requiere API key) - ⚠️ Free tier NO válido para este CLI":
 		return "groq", nil
 	// Comentado temporalmente - se usará más adelante
 	// case "Claude API (Anthropic API)":
@@ -142,6 +147,19 @@ func askProvider() (string, error) {
 	// 	return "zai", nil
 	default:
 		return "cli", nil
+	}
+}
+
+// showFreeTierWarning muestra una advertencia sobre proveedores con free tier limitado.
+func showFreeTierWarning(provider string) {
+	warningProviders := []string{"gemini", "groq"}
+	for _, wp := range warningProviders {
+		if provider == wp {
+			fmt.Println("\n⚠️  ADVERTENCIA: El free tier de", strings.ToUpper(provider), "tiene límites muy bajos (~15-50 requests/día).")
+			fmt.Println("   Este CLI genera múltiples archivos y excederá los límites rápidamente.")
+			fmt.Println("   Recomendamos usar Claude CLI (gratis con PRO) u OpenAI API en su lugar.")
+			fmt.Println()
+		}
 	}
 }
 

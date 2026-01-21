@@ -772,15 +772,15 @@ func askAIProvider() (string, error) {
 	prompt := &gSurvey.Select{
 		Message: "Selecciona el provider de IA a usar:",
 		Options: []string{
-			"Claude CLI (Gratis, más lento)",
-			"OpenAI API (Requiere API key, más rápido)",
-			"Google Gemini API (Free tier disponible)",
-			"Groq API (Free tier disponible)",
+			"Claude CLI (gratis con Claude Code PRO) - Opción por defecto",
+			"OpenAI API (Requiere API key)",
+			"Google Gemini API (Requiere API key) - ⚠️ Free tier NO válido para este CLI",
+			"Groq API (Requiere API key) - ⚠️ Free tier NO válido para este CLI",
 			// "Claude API (Requiere API key, más rápido)",
 			// "Z.AI API (Requiere API key, más rápido)",
 		},
-		Default: "Claude CLI (Gratis, más lento)",
-		Help:    "Claude CLI usa tu suscripción PRO existente. Gemini y Groq tienen capas gratuitas generosas.",
+		Default: "Claude CLI (gratis con Claude Code PRO) - Opción por defecto",
+		Help:    "Claude CLI usa tu suscripción PRO. Gemini y Groq free tiers tienen límites muy bajos (~15-50 req/día).",
 	}
 
 	if err := gSurvey.AskOne(prompt, &provider); err != nil {
@@ -789,13 +789,13 @@ func askAIProvider() (string, error) {
 
 	// Mapear la opción seleccionada al valor interno
 	switch provider {
-	case "Claude CLI (Gratis, más lento)":
+	case "Claude CLI (gratis con Claude Code PRO) - Opción por defecto":
 		return "cli", nil
-	case "OpenAI API (Requiere API key, más rápido)":
+	case "OpenAI API (Requiere API key)":
 		return "openai", nil
-	case "Google Gemini API (Free tier disponible)":
+	case "Google Gemini API (Requiere API key) - ⚠️ Free tier NO válido para este CLI":
 		return "gemini", nil
-	case "Groq API (Free tier disponible)":
+	case "Groq API (Requiere API key) - ⚠️ Free tier NO válido para este CLI":
 		return "groq", nil
 	// Comentado temporalmente - se usará más adelante
 	// case "Claude API (Requiere API key, más rápido)":
